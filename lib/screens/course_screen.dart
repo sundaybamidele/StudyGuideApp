@@ -31,10 +31,10 @@ class CourseScreen extends StatelessWidget {
         stream: _firestoreService.getTopics(course.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Text('No topics available');
+            return const Center(child: Text('No topics available'));
           }
           return ListView.builder(
             itemCount: snapshot.data!.length,

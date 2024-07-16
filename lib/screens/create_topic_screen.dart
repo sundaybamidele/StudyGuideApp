@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
-import '../models/topic.dart';
 
 class CreateTopicScreen extends StatelessWidget {
   final String courseId;
@@ -31,12 +30,11 @@ class CreateTopicScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                Topic newTopic = Topic(
-                  title: _titleController.text,
-                  content: _contentController.text,
-                  duration: 0, courseId: '',
+                await _firestoreService.createTopic(
+                  courseId,
+                  _titleController.text,
+                  _contentController.text,
                 );
-                await _firestoreService.addTopic(courseId, newTopic);
                 Navigator.pop(context);
               },
               child: const Text('Create Topic'),

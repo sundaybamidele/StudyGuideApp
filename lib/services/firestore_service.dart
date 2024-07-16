@@ -26,6 +26,26 @@ class FirestoreService {
     }
   }
 
+  // Create a new topic
+  Future<void> createTopic(String courseId, String title, String content) async {
+    try {
+      await topicsCollection.add({
+        'course_id': courseId,
+        'title': title,
+        'content': content,
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('Topic created successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error creating topic: $e');
+      }
+    }
+  }
+
   // Get all courses
   Stream<List<Course>> getCourses() {
     return coursesCollection.snapshots().map((snapshot) =>
