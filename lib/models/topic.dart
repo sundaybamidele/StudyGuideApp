@@ -3,7 +3,7 @@ class Topic {
   final String content;
   final String courseId;
 
-  Topic({required this.title, required this.content, required this.courseId, required int duration});
+  Topic({required this.title, required this.content, required this.courseId, required int duration, required String id});
 
   get studyDuration => null;
 
@@ -22,7 +22,7 @@ class Topic {
       title: data['title'],
       content: data['content'],
       courseId: data['course_id'],
-      duration: data['duration'] ?? 0,
+      duration: data['duration'] ?? 0, id: '',
     );
   }
 }

@@ -23,17 +23,11 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error creating course: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
   }
 
-  // Read all courses
-  Stream<List<Course>> getCourses() {
-    return coursesCollection.snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => Course.fromFirestore(doc)).toList()
-    );
-  }
-
-  // Update a course
+  // Update an existing course
   Future<void> updateCourse(String courseId, String title, String description) async {
     try {
       await coursesCollection.doc(courseId).update({
@@ -48,6 +42,7 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error updating course: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
   }
 
@@ -62,6 +57,7 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error deleting course: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
   }
 
@@ -82,17 +78,11 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error creating topic: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
   }
 
-  // Read topics for a specific course
-  Stream<List<Topic>> getTopics(String courseId) {
-    return topicsCollection.where('course_id', isEqualTo: courseId).snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
-    );
-  }
-
-  // Update a topic
+  // Update an existing topic
   Future<void> updateTopic(String topicId, String title, String content) async {
     try {
       await topicsCollection.doc(topicId).update({
@@ -107,6 +97,7 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error updating topic: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
   }
 
@@ -121,6 +112,26 @@ class FirestoreService {
       if (kDebugMode) {
         print('Error deleting topic: $e');
       }
+      rethrow; // Optional: rethrow the error to handle it in the UI
     }
+  }
+
+  // Get all courses
+  Stream<List<Course>> getCourses() {
+    return coursesCollection.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Course.fromFirestore(doc)).toList()
+    );
+  }
+
+  // Get topics for a specific course
+
+
+
+
+
+  Stream<List<Topic>> getTopics(String courseId) {
+    return topicsCollection.where('course_id', isEqualTo: courseId).snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
+    );
   }
 }

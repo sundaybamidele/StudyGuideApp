@@ -2,12 +2,44 @@ import 'package:flutter/material.dart';
 import '../models/course.dart';
 import '../services/firestore_service.dart';
 import 'create_course_screen.dart';
-import 'course_screen.dart';
+import 'course_screen.dart'; // Import the course screen
 
 class HomeScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
 
   HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManageCoursesScreen()),
+                );
+              },
+              child: const Text('Manage Courses'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ManageCoursesScreen extends StatelessWidget {
+  final FirestoreService _firestoreService = FirestoreService();
+
+  ManageCoursesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +52,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CreateCourseScreen()),
+                MaterialPageRoute(builder: (context) => const CreateCourseScreen()),
               );
             },
           ),
@@ -56,7 +88,12 @@ class HomeScreen extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
-                        // Navigate to the update course screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreateCourseScreen(course: course),
+                          ),
+                        );
                       },
                     ),
                     IconButton(

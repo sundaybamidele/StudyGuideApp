@@ -11,62 +11,6 @@ class CourseScreen extends StatelessWidget {
   CourseScreen({super.key, required this.course});
 
   @override
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -77,7 +21,9 @@ class CourseScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CreateTopicScreen(courseId: course.id)),
+                MaterialPageRoute(
+                  builder: (context) => CreateTopicScreen(courseId: course.id, topic: null),
+                ),
               );
             },
           ),
@@ -86,41 +32,86 @@ class CourseScreen extends StatelessWidget {
       body: StreamBuilder<List<Topic>>(
         stream: _firestoreService.getTopics(course.id),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No topics available'));
+            return const Center(
+              child: Text('No topics found.'),
+            );
           }
+
           return ListView.builder(
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               Topic topic = snapshot.data![index];
-              return ListTile(
-                title: Text(topic.title),
-                subtitle: Text(topic.content),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        // Navigate to the update topic screen
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () async {
-                        await _firestoreService.deleteTopic(topic.id!);
-                      },
-                    ),
-                  ],
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(topic.title),
+                  subtitle: Text(topic.content),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _editTopic(context, topic);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _deleteTopic(context, topic.id!);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           );
         },
       ),
+    );
+  }
+
+  void _editTopic(BuildContext context, Topic topic) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateTopicScreen(courseId: course.id, topic: topic),
+      ),
+    );
+  }
+
+  void _deleteTopic(BuildContext context, String topicId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Topic'),
+          content: const Text('Are you sure you want to delete this topic?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () async {
+                try {
+                  await _firestoreService.deleteTopic(topicId);
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting topic: $e')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
