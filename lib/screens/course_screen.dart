@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
+import '../models/topic.dart';
 import '../services/firestore_service.dart';
 import 'create_topic_screen.dart';
-import '../models/topic.dart';
 
 class CourseScreen extends StatelessWidget {
   final Course course;
@@ -11,6 +11,62 @@ class CourseScreen extends StatelessWidget {
   CourseScreen({super.key, required this.course});
 
   @override
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -43,6 +99,23 @@ class CourseScreen extends StatelessWidget {
               return ListTile(
                 title: Text(topic.title),
                 subtitle: Text(topic.content),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        // Navigate to the update topic screen
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        await _firestoreService.deleteTopic(topic.id!);
+                      },
+                    ),
+                  ],
+                ),
               );
             },
           );

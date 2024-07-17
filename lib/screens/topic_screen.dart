@@ -28,7 +28,7 @@ class _TopicScreenState extends State<TopicScreen> {
         duration: 0, // Changed from null to 0
       );
       try {
-        await _firestoreService.addTopic(topic as String, widget.courseId as Topic);
+        await _firestoreService.createTopic(topic.title, topic.content, widget.courseId);
         Navigator.of(context).pop(); // Close the dialog or navigate away
       } catch (e) {
         if (kDebugMode != null && kDebugMode!) {

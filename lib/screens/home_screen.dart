@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:studyguideapp/screens/course_screen.dart'; // Ensure this import is correct
-import 'package:studyguideapp/screens/create_course_screen.dart' as create;
-import '../services/firestore_service.dart';
 import '../models/course.dart';
+import '../services/firestore_service.dart';
+import 'create_course_screen.dart';
+import 'course_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
@@ -13,14 +13,14 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Courses'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => create.CreateCourseScreen()),
+                MaterialPageRoute(builder: (context) => CreateCourseScreen()),
               );
             },
           ),
@@ -45,9 +45,28 @@ class HomeScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CourseScreen(course: course)), // Ensure CourseScreen is correctly used
+                    MaterialPageRoute(
+                      builder: (context) => CourseScreen(course: course),
+                    ),
                   );
                 },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        // Navigate to the update course screen
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        await _firestoreService.deleteCourse(course.id);
+                      },
+                    ),
+                  ],
+                ),
               );
             },
           );
@@ -56,5 +75,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-//

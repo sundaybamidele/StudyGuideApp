@@ -27,7 +27,7 @@ class ReminderScreen extends StatelessWidget {
                   trailing: IconButton(
                     icon: const Icon(Icons.check),
                     onPressed: () async {
-                      await firestoreService.deleteReminder(topics[index].id!, topics[index].id!);
+                      await firestoreService.deleteTopic(topics[index].id!);
                     },
                   ),
                 );

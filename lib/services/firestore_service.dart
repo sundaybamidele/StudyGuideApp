@@ -26,6 +26,45 @@ class FirestoreService {
     }
   }
 
+  // Read all courses
+  Stream<List<Course>> getCourses() {
+    return coursesCollection.snapshots().map((snapshot) =>
+      snapshot.docs.map((doc) => Course.fromFirestore(doc)).toList()
+    );
+  }
+
+  // Update a course
+  Future<void> updateCourse(String courseId, String title, String description) async {
+    try {
+      await coursesCollection.doc(courseId).update({
+        'title': title,
+        'description': description,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('Course updated successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating course: $e');
+      }
+    }
+  }
+
+  // Delete a course
+  Future<void> deleteCourse(String courseId) async {
+    try {
+      await coursesCollection.doc(courseId).delete();
+      if (kDebugMode) {
+        print('Course deleted successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting course: $e');
+      }
+    }
+  }
+
   // Create a new topic
   Future<void> createTopic(String courseId, String title, String content) async {
     try {
@@ -46,22 +85,42 @@ class FirestoreService {
     }
   }
 
-  // Get all courses
-  Stream<List<Course>> getCourses() {
-    return coursesCollection.snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => Course.fromFirestore(doc)).toList()
-    );
-  }
-
-  // Get topics for a specific course
+  // Read topics for a specific course
   Stream<List<Topic>> getTopics(String courseId) {
     return topicsCollection.where('course_id', isEqualTo: courseId).snapshots().map((snapshot) =>
       snapshot.docs.map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
     );
   }
 
-  // Placeholder methods (to be implemented if needed)
-  addCourse(Course newCourse) {}
-  addTopic(String courseId, Topic newTopic) {}
-  deleteReminder(String s, String t) {}
+  // Update a topic
+  Future<void> updateTopic(String topicId, String title, String content) async {
+    try {
+      await topicsCollection.doc(topicId).update({
+        'title': title,
+        'content': content,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('Topic updated successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating topic: $e');
+      }
+    }
+  }
+
+  // Delete a topic
+  Future<void> deleteTopic(String topicId) async {
+    try {
+      await topicsCollection.doc(topicId).delete();
+      if (kDebugMode) {
+        print('Topic deleted successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error deleting topic: $e');
+      }
+    }
+  }
 }

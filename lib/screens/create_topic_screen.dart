@@ -30,12 +30,21 @@ class CreateTopicScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                await _firestoreService.createTopic(
-                  courseId,
-                  _titleController.text,
-                  _contentController.text,
-                );
-                Navigator.pop(context);
+                try {
+                  await _firestoreService.createTopic(
+                    courseId,
+                    _titleController.text,
+                    _contentController.text,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Topic created successfully')),
+                  );
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error creating topic: $e')),
+                  );
+                }
               },
               child: const Text('Create Topic'),
             ),
