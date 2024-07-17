@@ -17,7 +17,7 @@ class Topic {
     };
   }
 
-  static Topic fromFirestore(Map<String, dynamic> data) {
+  static Topic fromFirestore(Map<String, dynamic> data, String id) {
     return Topic(
       title: data['title'],
       content: data['content'],

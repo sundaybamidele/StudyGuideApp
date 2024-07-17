@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:studyguideapp/services/firestore_service.dart';
-
+import 'package:studyguideapp/screens/course_screen.dart'; // Ensure this import is correct
+import 'package:studyguideapp/screens/create_course_screen.dart' as create;
+import '../services/firestore_service.dart';
 import '../models/course.dart';
-import 'course_screen.dart';
-import 'create_course_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
 
   HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CreateCourseScreen()),
+                MaterialPageRoute(builder: (context) => create.CreateCourseScreen()),
               );
             },
           ),
@@ -30,10 +30,10 @@ class HomeScreen extends StatelessWidget {
         stream: _firestoreService.getCourses(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Text('No courses available');
+            return const Center(child: Text('No courses available'));
           }
           return ListView.builder(
             itemCount: snapshot.data!.length,
@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CourseScreen(course: course)),
+                    MaterialPageRoute(builder: (context) => CourseScreen(course: course)), // Ensure CourseScreen is correctly used
                   );
                 },
               );

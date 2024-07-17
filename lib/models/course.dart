@@ -1,15 +1,34 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Course {
   final String id;
   final String title;
   final String description;
 
-  Course({this.id = '', required this.title, required this.description});
+  Course({
+    required this.id,
+    required this.title,
+    required this.description,
+  });
 
-  factory Course.fromFirestore(Map<String, dynamic> data) {
+  factory Course.fromFirestore(DocumentSnapshot doc, [String? id]) {
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw const FormatException('Invalid data format for Course');
+    }
+
     return Course(
-      id: data['id'] ?? '',
+      id: doc.id,
       title: data['title'] ?? '',
       description: data['description'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+    };
   }
 }

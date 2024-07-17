@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
-import '../models/course.dart';
 
 class CreateCourseScreen extends StatelessWidget {
   final _titleController = TextEditingController();
@@ -30,12 +29,20 @@ class CreateCourseScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                Course newCourse = Course(
-                  title: _titleController.text,
-                  description: _descriptionController.text,
-                );
-                await _firestoreService.addCourse(newCourse);
-                Navigator.pop(context);
+                try {
+                  await _firestoreService.createCourse(
+                    _titleController.text,
+                    _descriptionController.text,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Course created successfully')),
+                  );
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error creating course: $e')),
+                  );
+                }
               },
               child: const Text('Create Course'),
             ),
