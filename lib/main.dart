@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart'; // Import other screens as needed
+import 'screens/home_screen.dart';
 import 'screens/course_screen.dart';
 import 'screens/study_materials_screen.dart';
 import 'screens/assessment_screen.dart';
-import 'screens/login_screen.dart'; // Your login screen
+import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/storage_service.dart';
+import 'services/notification_service.dart';
+import 'models/course.dart'; // Import your Course model
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Initialize timezone data
+  tz.initializeTimeZones();
+
+  // Initialize notification plugin
+  await initializeNotifications();
+
   runApp(const MyApp());
 }
 
@@ -35,10 +45,9 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => const SplashScreen(), // Initial route goes to splash screen
+          '/': (context) => const SplashScreen(),
           '/home': (context) => HomeScreen(),
-          // ignore: null_check_always_fails
-          '/courses': (context) => CourseScreen(course: null!), // Added null as a placeholder
+          '/courses': (context) => CourseScreen(course: Course(id: 'placeholder', title: 'Sample Course', description: 'Description')), // Replace with a valid Course object
           '/study_materials': (context) => const StudyMaterialsScreen(),
           '/assessment': (context) => const AssessmentScreen(),
           '/login': (context) => LoginScreen(),

@@ -3,10 +3,10 @@ import '../models/course.dart';
 import '../services/firestore_service.dart';
 import 'create_course_screen.dart';
 import 'course_screen.dart';
-import 'study_materials_screen.dart'; // Replace with your actual study materials screen
-import 'assessment_screen.dart'; // Replace with your actual assessment screen
-import 'reminder_screen.dart'; // Replace with your actual reminder screen
-import 'login_screen.dart'; // Replace with your actual login screen
+import 'study_materials_screen.dart';
+import 'assessment_screen.dart';
+import 'reminder_screen.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const StudyMaterialsScreen()), // Replace with your actual study materials screen
+                  MaterialPageRoute(builder: (context) => const StudyMaterialsScreen()),
                 );
               },
             ),
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AssessmentScreen()), // Replace with your actual assessment screen
+                  MaterialPageRoute(builder: (context) => const AssessmentScreen()),
                 );
               },
             ),
@@ -72,7 +72,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ReminderScreen()), // Replace with your actual reminder screen
+                  MaterialPageRoute(builder: (context) => const ReminderScreen()),
                 );
               },
             ),
@@ -81,11 +81,10 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () {
-                // Implement logout functionality
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()), // Replace with your actual login screen
-                  (Route<dynamic> route) => false, // Removes all routes from the stack, preventing back navigation
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (Route<dynamic> route) => false,
                 );
               },
             ),

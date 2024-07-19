@@ -59,7 +59,7 @@ class CourseScreen extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: () {
-                          _deleteTopic(context, topic.id!);
+                          _deleteTopic(context, topic.id);
                         },
                       ),
                     ],

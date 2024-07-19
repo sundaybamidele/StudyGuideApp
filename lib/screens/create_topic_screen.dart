@@ -16,6 +16,7 @@ class CreateTopicScreenState extends State<CreateTopicScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final _durationController = TextEditingController();
   final FirestoreService _firestoreService = FirestoreService();
 
   @override
@@ -24,6 +25,7 @@ class CreateTopicScreenState extends State<CreateTopicScreen> {
     if (widget.topic != null) {
       _titleController.text = widget.topic!.title;
       _contentController.text = widget.topic!.content;
+      _durationController.text = widget.topic!.studyDuration.toString();
     }
   }
 
@@ -31,6 +33,7 @@ class CreateTopicScreenState extends State<CreateTopicScreen> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -67,6 +70,20 @@ class CreateTopicScreenState extends State<CreateTopicScreen> {
                   return null;
                 },
               ),
+              TextFormField(
+                controller: _durationController,
+                decoration: const InputDecoration(labelText: 'Study Duration (minutes)'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a duration';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
@@ -77,15 +94,17 @@ class CreateTopicScreenState extends State<CreateTopicScreen> {
                           widget.courseId,
                           _titleController.text,
                           _contentController.text,
+                          int.parse(_durationController.text),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Topic created successfully')),
                         );
                       } else {
                         await _firestoreService.updateTopic(
-                          widget.topic!.id!,
+                          widget.topic!.id,
                           _titleController.text,
                           _contentController.text,
+                          int.parse(_durationController.text),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Topic updated successfully')),

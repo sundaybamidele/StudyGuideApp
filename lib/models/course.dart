@@ -10,7 +10,7 @@ class Course {
     required this.title,
     required this.description,
   });
-
+//
   factory Course.fromFirestore(DocumentSnapshot doc, [String? id]) {
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
 

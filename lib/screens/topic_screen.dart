@@ -25,10 +25,12 @@ class _TopicScreenState extends State<TopicScreen> {
         title: _titleController.text,
         content: _contentController.text,
         courseId: widget.courseId,
-        duration: 0, id: '', // Changed from null to 0
+        duration: 0,
+        id: '',
+        studyDuration: 0, // Changed from null to 0
       );
       try {
-        await _firestoreService.createTopic(topic.title, topic.content, widget.courseId);
+        await _firestoreService.createTopic(topic.title, topic.content, widget.courseId, topic.duration);
         Navigator.of(context).pop(); // Close the dialog or navigate away
       } catch (e) {
         if (kDebugMode != null && kDebugMode!) {
