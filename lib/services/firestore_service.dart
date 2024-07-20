@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:studyguideapp/services/notification_service.dart';
 import '../models/course.dart';
 import '../models/topic.dart';
 import '../models/assessment_result.dart'; // Import the assessment result model
-import 'notification_service.dart';  // Import the notification service
 
 class FirestoreService {
   final CollectionReference coursesCollection = FirebaseFirestore.instance.collection('courses');
   final CollectionReference topicsCollection = FirebaseFirestore.instance.collection('topics');
   final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results'); // New collection for assessment results
+  final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback'); // New collection for feedback
 
   // Create a new course
   Future<void> createCourse(String title, String description) async {
@@ -162,10 +163,56 @@ class FirestoreService {
     );
   }
 
-  // Get assessment results (optional)
+  // Get assessment results
   Stream<List<AssessmentResult>> getAssessmentResults() {
     return assessmentResultsCollection.snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => AssessmentResult.fromMap(doc.data() as Map<String, dynamic>)).toList()
     );
+  }
+
+  // Save feedback
+  Future<void> submitFeedback(
+    int usefulnessRating,
+    String usageFrequency,
+    String gradesImprovement,
+    int navigationEaseRating,
+    int satisfactionRating,
+    String organizationEffect,
+    int contentQualityRating,
+    String recommendation,
+    String suggestions,
+    String additionalComments
+  ) async {
+    try {
+      // Check if ratings are within expected range (e.g., 1 to 5)
+      if (usefulnessRating < 1 || usefulnessRating > 5 ||
+          navigationEaseRating < 1 || navigationEaseRating > 5 ||
+          satisfactionRating < 1 || satisfactionRating > 5 ||
+          contentQualityRating < 1 || contentQualityRating > 5) {
+        throw ArgumentError('Ratings must be between 1 and 5');
+      }
+
+      await feedbackCollection.add({
+        'usefulnessRating': usefulnessRating,
+        'usageFrequency': usageFrequency,
+        'gradesImprovement': gradesImprovement,
+        'navigationEaseRating': navigationEaseRating,
+        'satisfactionRating': satisfactionRating,
+        'organizationEffect': organizationEffect,
+        'contentQualityRating': contentQualityRating,
+        'recommendation': recommendation,
+        'suggestions': suggestions,
+        'additionalComments': additionalComments,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('Feedback submitted successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error submitting feedback: $e');
+      }
+      rethrow;
+    }
   }
 }

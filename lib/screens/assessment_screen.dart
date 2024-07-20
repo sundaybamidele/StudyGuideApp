@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:studyguideapp/models/assessment_result.dart';
 import '../services/firestore_service.dart';
 import '../models/topic.dart';
-import '../models/assessment_result.dart'; // Define this model to handle results
+import 'feedback_screen.dart';  // Import FeedbackScreen
 
 class AssessmentScreen extends StatefulWidget {
   const AssessmentScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _AssessmentScreenState createState() => _AssessmentScreenState();
 }
 
@@ -19,7 +22,7 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assessment'),
@@ -36,7 +39,24 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No questions available'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('No questions available'),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FeedbackScreen()),
+                      );
+                    },
+                    child: const Text('Provide Feedback'),
+                  ),
+                ],
+              ),
+            );
           }
 
           final topics = snapshot.data!;
@@ -66,6 +86,18 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                     }
                   },
                   child: const Text('Submit'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FeedbackScreen()),
+                    );
+                  },
+                  child: const Text('Provide Feedback'),
                 ),
               ),
             ],
@@ -142,10 +174,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         );
       }
     } catch (e) {
-      final isDebugMode = bool.fromEnvironment('dart.vm.product') == false;
+      const isDebugMode = bool.fromEnvironment('dart.vm.product') == false;
 
       if (isDebugMode) {
-        print('Error saving assessment result: $e');
+        if (kDebugMode) {
+          print('Error saving assessment result: $e');
+        }
       }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error saving assessment result')),
