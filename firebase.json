@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"studyguideapp-4a8bf","appId":"1:1086255110542:android:7726eeed5a9c0f0c4a2cdf","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"studyguideapp-4a8bf","configurations":{"android":"1:1086255110542:android:7726eeed5a9c0f0c4a2cdf","ios":"1:1086255110542:ios:36b19609cf97eb684a2cdf","macos":"1:1086255110542:ios:36b19609cf97eb684a2cdf","web":"1:1086255110542:web:62cec92679bb1ddc4a2cdf","windows":"1:1086255110542:web:9cca0078e01407bb4a2cdf"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "studyguideapp-4a8bf",
+          "appId": "1:1086255110542:android:7726eeed5a9c0f0c4a2cdf",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "studyguideapp-4a8bf",
+          "configurations": {
+            "android": "1:1086255110542:android:7726eeed5a9c0f0c4a2cdf",
+            "ios": "1:1086255110542:ios:36b19609cf97eb684a2cdf",
+            "macos": "1:1086255110542:ios:36b19609cf97eb684a2cdf",
+            "web": "1:1086255110542:web:62cec92679bb1ddc4a2cdf",
+            "windows": "1:1086255110542:web:9cca0078e01407bb4a2cdf"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}
