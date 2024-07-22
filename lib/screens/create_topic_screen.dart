@@ -58,7 +58,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                       content: content,
                       duration: duration,
                     );
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Navigate back to the CourseScreen
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error creating topic: $e')),

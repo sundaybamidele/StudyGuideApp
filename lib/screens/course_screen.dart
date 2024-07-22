@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:studyguideapp/screens/create_course_screen.dart';
-import 'package:studyguideapp/screens/topic_screen.dart';
+import 'package:studyguideapp/screens/create_topic_screen.dart';
+// ignore: unused_import
 import '../models/course.dart';
+import '../models/topic.dart'; // Import the Topic model
 import '../services/firestore_service.dart';
 
 class CourseScreen extends StatefulWidget {
   final String courseId;
 
   // ignore: use_super_parameters
-  const CourseScreen({Key? key, this.courseId = ''}) : super(key: key);
+  const CourseScreen({Key? key, required this.courseId}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -16,24 +17,23 @@ class CourseScreen extends StatefulWidget {
 }
 
 class _CourseScreenState extends State<CourseScreen> {
+  late Stream<List<Topic>> _topicsStream;
   final FirestoreService _firestoreService = FirestoreService();
-  late Stream<List<Course>> _coursesStream;
-  List<Course> _courses = [];
 
   @override
   void initState() {
     super.initState();
-    _coursesStream = _firestoreService.getCourses();
+    _topicsStream = _firestoreService.getTopics(widget.courseId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Courses'),
+        title: const Text('Course Topics'),
       ),
-      body: StreamBuilder<List<Course>>(
-        stream: _coursesStream,
+      body: StreamBuilder<List<Topic>>(
+        stream: _topicsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -43,26 +43,21 @@ class _CourseScreenState extends State<CourseScreen> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          _courses = snapshot.data ?? [];
+          final topics = snapshot.data ?? [];
 
-          if (_courses.isEmpty) {
-            return const Center(child: Text('No courses available.'));
+          if (topics.isEmpty) {
+            return const Center(child: Text('No topics available.'));
           }
 
           return ListView.builder(
-            itemCount: _courses.length,
+            itemCount: topics.length,
             itemBuilder: (context, index) {
-              final course = _courses[index];
+              final topic = topics[index];
               return ListTile(
-                title: Text(course.title),
-                subtitle: Text(course.description),
+                title: Text(topic.title),
+                subtitle: Text(topic.content),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TopicScreen(courseId: course.id, topicId: '',),
-                    ),
-                  );
+                  // Navigate to TopicScreen or any other relevant screen
                 },
               );
             },
@@ -73,7 +68,9 @@ class _CourseScreenState extends State<CourseScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const CreateCourseScreen()),
+            MaterialPageRoute(
+              builder: (context) => CreateTopicScreen(courseId: widget.courseId),
+            ),
           );
         },
         child: const Icon(Icons.add),

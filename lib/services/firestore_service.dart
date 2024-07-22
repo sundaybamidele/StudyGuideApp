@@ -286,4 +286,16 @@ class FirestoreService {
       rethrow;
     }
   }
+
+  // Send email response using Firebase Functions
+  Future<void> sendEmailResponse(String email) async {
+    try {
+      final HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail'); // Make sure the function name matches your deployed function
+      await callable.call(<String, dynamic>{
+        'email': email,
+      });
+    } catch (e) {
+      debugPrint('Failed to send email response: $e');
+    }
+  }
 }
