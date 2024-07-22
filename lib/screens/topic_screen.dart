@@ -6,7 +6,7 @@ import '../models/topic.dart';
 class TopicScreen extends StatelessWidget {
   final String topicId; // The ID of the topic to be edited or viewed
 
-  const TopicScreen({super.key, required this.topicId});
+  const TopicScreen({super.key, required this.topicId, required String courseId});
 
   @override
   Widget build(BuildContext context) {

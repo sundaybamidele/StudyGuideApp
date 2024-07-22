@@ -1,116 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:studyguideapp/models/course.dart';
-import 'package:studyguideapp/models/topic.dart';
-import 'package:studyguideapp/services/firestore_service.dart';
-import 'create_topic_screen.dart'; // Import the CreateTopicScreen
+import 'package:studyguideapp/screens/create_course_screen.dart';
+import 'package:studyguideapp/screens/topic_screen.dart';
+import '../models/course.dart';
+import '../services/firestore_service.dart';
 
-class CourseScreen extends StatelessWidget {
+class CourseScreen extends StatefulWidget {
   final String courseId;
 
-  const CourseScreen({super.key, required this.courseId});
+  // ignore: use_super_parameters
+  const CourseScreen({Key? key, this.courseId = ''}) : super(key: key);
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _CourseScreenState createState() => _CourseScreenState();
+}
+
+class _CourseScreenState extends State<CourseScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
+  late Stream<List<Course>> _coursesStream;
+  List<Course> _courses = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _coursesStream = _firestoreService.getCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = Provider.of<FirestoreService>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: FutureBuilder<Course?>(
-          future: firestoreService.getCourse(courseId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            }
-            if (!snapshot.hasData) {
-              return const Text('Course not found');
-            }
-            return Text(snapshot.data!.title);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CreateTopicScreen(courseId: courseId),
-                ),
-              );
-            },
-          ),
-        ],
+        title: const Text('Courses'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FutureBuilder<Course?>(
-              future: firestoreService.getCourse(courseId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData) {
-                  return const Text('Course not found');
-                }
+      body: StreamBuilder<List<Course>>(
+        stream: _coursesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                final course = snapshot.data!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Title: ${course.title}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Description: ${course.description}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Topics:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                );
-              },
-            ),
-            Expanded(
-              child: StreamBuilder<List<Topic>>(
-                stream: firestoreService.getTopics(courseId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No topics available'));
-                  }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final topic = snapshot.data![index];
-                      return ListTile(
-                        title: Text(topic.title),
-                        subtitle: Text(topic.content),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            // Handle edit topic action
-                          },
-                        ),
-                      );
-                    },
+          _courses = snapshot.data ?? [];
+
+          if (_courses.isEmpty) {
+            return const Center(child: Text('No courses available.'));
+          }
+
+          return ListView.builder(
+            itemCount: _courses.length,
+            itemBuilder: (context, index) {
+              final course = _courses[index];
+              return ListTile(
+                title: Text(course.title),
+                subtitle: Text(course.description),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TopicScreen(courseId: course.id, topicId: '',),
+                    ),
                   );
                 },
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateCourseScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

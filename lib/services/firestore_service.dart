@@ -298,4 +298,21 @@ class FirestoreService {
       debugPrint('Failed to send email response: $e');
     }
   }
+
+  // Fetch topics by course ID
+  Future<List<Topic>> getTopicsByCourse(String courseId) async {
+    try {
+      final querySnapshot = await topicsCollection
+          .where('course_id', isEqualTo: courseId)
+          .get();
+      return querySnapshot.docs
+          .map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching topics by course: $e');
+      }
+      return [];
+    }
+  }
 }
