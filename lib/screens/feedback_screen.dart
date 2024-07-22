@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/firestore_service.dart';
@@ -6,13 +8,13 @@ class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _FeedbackScreenState createState() => _FeedbackScreenState();
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  String _email = '';
   int _usefulnessRating = 1;
   String _usageFrequency = 'Daily';
   String _gradesImprovement = 'Yes';
@@ -44,6 +46,22 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   'We value your feedback! Please let us know how we are doing.',
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+
+                // Email Address
+                const Text(
+                  'Your Email Address:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    _email = value;
+                  },
+                  validator: (value) => value == null || value.isEmpty ? 'Please provide your email address' : null,
                 ),
                 const SizedBox(height: 20),
 
@@ -252,6 +270,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     if (_formKey.currentState?.validate() ?? false) {
                       try {
                         await firestoreService.submitFeedback(
+                          _email,
                           _usefulnessRating,
                           _usageFrequency,
                           _gradesImprovement,

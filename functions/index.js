@@ -99,3 +99,25 @@ function getResponseBasedOnFeedback(feedback) {
   }
   return response;
 }
+
+/**
+ * Cloud Function to send email response.
+ * Callable function to send an email to the user.
+ */
+exports.sendEmailResponse = functions.https.onCall(async (data, context) => {
+  const mailOptions = {
+    from: functions.config().email.user,
+    to: data.email,
+    subject: data.subject,
+    text: data.message,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent to:", data.email);
+    return {success: true};
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return {success: false, error: error.message};
+  }
+});

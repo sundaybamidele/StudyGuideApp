@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:studyguideapp/services/notification_service.dart';
 import '../models/course.dart';
 import '../models/topic.dart';
@@ -10,6 +11,7 @@ class FirestoreService {
   final CollectionReference topicsCollection = FirebaseFirestore.instance.collection('topics');
   final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results'); // New collection for assessment results
   final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback'); // New collection for feedback
+  final FirebaseFunctions functions = FirebaseFunctions.instance; // Initialize Firebase Functions
 
   // Create a new course
   Future<void> createCourse(String title, String description) async {
@@ -170,8 +172,9 @@ class FirestoreService {
     );
   }
 
-  // Save feedback
+  // Save feedback and send email response
   Future<void> submitFeedback(
+    String email,
     int usefulnessRating,
     String usageFrequency,
     String gradesImprovement,
@@ -193,6 +196,7 @@ class FirestoreService {
       }
 
       await feedbackCollection.add({
+        'email': email,
         'usefulnessRating': usefulnessRating,
         'usageFrequency': usageFrequency,
         'gradesImprovement': gradesImprovement,
@@ -205,14 +209,30 @@ class FirestoreService {
         'additionalComments': additionalComments,
         'timestamp': FieldValue.serverTimestamp(),
       });
+
+      // Call the Firebase Function to send an email response
+      await sendEmailResponse(email);
+
       if (kDebugMode) {
-        print('Feedback submitted successfully');
+        print('Feedback submitted and email response sent successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error submitting feedback: $e');
+        print('Error submitting feedback or sending email response: $e');
       }
       rethrow;
+    }
+  }
+
+  // Send email response using Firebase Functions
+  Future<void> sendEmailResponse(String email) async {
+    try {
+      final HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail'); // Make sure the function name matches your deployed function
+      await callable.call(<String, dynamic>{
+        'email': email,
+      });
+    } catch (e) {
+      debugPrint('Failed to send email response: $e');
     }
   }
 }
