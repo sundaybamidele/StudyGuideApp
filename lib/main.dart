@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/course_screen.dart'; // Make sure this is correct
+import 'screens/course_screen.dart'; // Ensure this import is correct
 import 'screens/study_materials_screen.dart';
 import 'screens/assessment_screen.dart';
 import 'screens/login_screen.dart';
@@ -12,7 +12,6 @@ import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
-import 'models/course.dart'; // Import your Course model
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,9 +45,10 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
+          // ignore: prefer_const_constructors
           '/home': (context) => HomeScreen(),
-          // Make sure to use a valid Course object or handle the CourseScreen initialization differently
-          '/courses': (context) => CourseScreen(courseId: 'sample_course_id'), // Adjust to your needs
+          // ignore: prefer_const_constructors
+          '/courses': (context) => CourseScreen(courseId: 'sample_course_id'), // Adjust as needed
           '/study_materials': (context) => const StudyMaterialsScreen(),
           '/assessment': (context) => const AssessmentScreen(),
           '/login': (context) => LoginScreen(),

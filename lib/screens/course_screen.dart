@@ -1,89 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
+import '../models/course.dart'; // Ensure this import is correct
 
-class CreateTopicScreen extends StatefulWidget {
-  final String courseId; // The ID of the course to which the topic belongs
+class CourseScreen extends StatelessWidget {
+  final String courseId; // The ID of the course to be displayed
 
-  const CreateTopicScreen({super.key, required this.courseId});
+  const CourseScreen({super.key, required this.courseId});
 
-  @override
-  // ignore: library_private_types_in_public_api
-  _CreateTopicScreenState createState() => _CreateTopicScreenState();
-}
-
-class _CreateTopicScreenState extends State<CreateTopicScreen> {
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
-  final _durationController = TextEditingController();
-  final _optionsController = TextEditingController();
-  
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Topic'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+
+    return FutureBuilder<Course?>(
+      future: firestoreService.getCourse(courseId), // Implement this method in FirestoreService
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: Text('Course not found'));
+        }
+
+        final course = snapshot.data!;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(course.title),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Title: ${course.title}',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Description: ${course.description}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                // Add more widgets to display course details
+              ],
             ),
-            TextField(
-              controller: _contentController,
-              decoration: const InputDecoration(labelText: 'Content'),
-            ),
-            TextField(
-              controller: _durationController,
-              decoration: const InputDecoration(labelText: 'Duration (in minutes)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _optionsController,
-              decoration: const InputDecoration(labelText: 'Options (comma separated)'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                final title = _titleController.text;
-                final content = _contentController.text;
-                final duration = int.tryParse(_durationController.text) ?? 0;
-                final options = _optionsController.text.split(',').map((option) => option.trim()).toList();
-                
-                if (title.isNotEmpty && content.isNotEmpty && duration > 0) {
-                  try {
-                    await firestoreService.createTopic(
-                      courseId: widget.courseId,
-                      title: title,
-                      content: content,
-                      duration: duration,
-                      options: options,
-                    );
-                    Navigator.pop(context);
-                  } catch (e) {
-                    // Handle any errors that occur
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating topic: $e')),
-                    );
-                  }
-                } else {
-                  // Handle validation error
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields correctly')),
-                  );
-                }
-              },
-              child: const Text('Create Topic'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

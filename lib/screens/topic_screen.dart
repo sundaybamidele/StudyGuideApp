@@ -48,14 +48,7 @@ class TopicScreen extends StatelessWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Options:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                ...topic.options.map((option) => Text(
-                  option,
-                  style: const TextStyle(fontSize: 16),
-                )),
+                // Removed Options section
               ],
             ),
           ),

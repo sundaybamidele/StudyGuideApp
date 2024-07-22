@@ -69,10 +69,10 @@ class _ReminderScreenState extends State<ReminderScreen> {
                           ),
                         ),
                         subtitle: Text('Duration: ${topic.duration} mins'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.check),
-                          onPressed: () async {
-                            await firestoreService.updateTopicCompletion(topic.id, !topic.completed);
+                        trailing: Checkbox(
+                          value: topic.completed,
+                          onChanged: (value) async {
+                            await firestoreService.updateTopicCompletion(topic.id, value!);
                           },
                         ),
                       );

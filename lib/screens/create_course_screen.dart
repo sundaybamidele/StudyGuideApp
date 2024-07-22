@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../services/firestore_service.dart';
-import '../models/course.dart';
+import 'package:provider/provider.dart';
+import 'package:studyguideapp/models/course.dart';
+import 'package:studyguideapp/services/firestore_service.dart';
 
 class CreateCourseScreen extends StatefulWidget {
-  final Course? course;
+  final Course? course; // Optional parameter if editing an existing course
 
   const CreateCourseScreen({super.key, this.course});
 
@@ -13,10 +14,8 @@ class CreateCourseScreen extends StatefulWidget {
 }
 
 class _CreateCourseScreenState extends State<CreateCourseScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   void initState() {
@@ -28,80 +27,60 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
   }
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final firestoreService = Provider.of<FirestoreService>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.course == null ? 'Create Course' : 'Edit Course'),
+        title: const Text('Create Course'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      if (widget.course == null) {
-                        await _firestoreService.createCourse(
-                          _titleController.text,
-                          _descriptionController.text,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Course created successfully')),
-                        );
-                      } else {
-                        await _firestoreService.updateCourse(
-                          widget.course!.id,
-                          _titleController.text,
-                          _descriptionController.text,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Course updated successfully')),
-                        );
-                      }
-                      Navigator.pop(context);
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error creating/updating course: $e')),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                final title = _titleController.text;
+                final description = _descriptionController.text;
+
+                if (title.isNotEmpty && description.isNotEmpty) {
+                  try {
+                    if (widget.course == null) {
+                      // Creating a new course
+                      await firestoreService.createCourse(title, description);
+                    } else {
+                      // Updating an existing course
+                      await firestoreService.updateCourse(
+                        widget.course!.id,
+                        title,
+                        description,
                       );
                     }
+                    Navigator.pop(context);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error saving course: $e')),
+                    );
                   }
-                },
-                child: Text(widget.course == null ? 'Create Course' : 'Save Course'),
-              ),
-            ],
-          ),
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all fields')),
+                  );
+                }
+              },
+              child: Text(widget.course == null ? 'Create Course' : 'Update Course'),
+            ),
+          ],
         ),
       ),
     );

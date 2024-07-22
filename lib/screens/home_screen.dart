@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../services/firestore_service.dart';
 import 'create_course_screen.dart';
@@ -10,12 +11,12 @@ import 'login_screen.dart';
 import 'feedback_screen.dart'; // Import FeedbackScreen
 
 class HomeScreen extends StatelessWidget {
-  final FirestoreService _firestoreService = FirestoreService();
-
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final firestoreService = Provider.of<FirestoreService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Courses'),
@@ -103,7 +104,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<List<Course>>(
-        stream: _firestoreService.getCourses(),
+        stream: firestoreService.getCourses(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -122,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CourseScreen(course: course),
+                      builder: (context) => CourseScreen(courseId: course.id),
                     ),
                   );
                 },
@@ -143,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
-                        await _firestoreService.deleteCourse(course.id);
+                        await firestoreService.deleteCourse(course.id);
                       },
                     ),
                   ],
