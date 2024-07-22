@@ -286,33 +286,4 @@ class FirestoreService {
       rethrow;
     }
   }
-
-  // Send email response using Firebase Functions
-  Future<void> sendEmailResponse(String email) async {
-    try {
-      final HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail'); // Make sure the function name matches your deployed function
-      await callable.call(<String, dynamic>{
-        'email': email,
-      });
-    } catch (e) {
-      debugPrint('Failed to send email response: $e');
-    }
-  }
-
-  // Fetch topics by course ID
-  Future<List<Topic>> getTopicsByCourse(String courseId) async {
-    try {
-      final querySnapshot = await topicsCollection
-          .where('course_id', isEqualTo: courseId)
-          .get();
-      return querySnapshot.docs
-          .map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
-          .toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching topics by course: $e');
-      }
-      return [];
-    }
-  }
 }
