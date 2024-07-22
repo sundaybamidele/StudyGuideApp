@@ -73,7 +73,6 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
-    required List<String> options,
   }) async {
     try {
       var docRef = await topicsCollection.add({
@@ -82,7 +81,6 @@ class FirestoreService {
         'content': content,
         'duration': duration,
         'completed': false, // Initialize as not completed
-        'options': options, // Store options
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -109,14 +107,12 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
-    required List<String> options,
   }) async {
     try {
       await topicsCollection.doc(topicId).update({
         'title': title,
         'content': content,
         'duration': duration,
-        'options': options, // Update options
         'updated_at': FieldValue.serverTimestamp(),
       });
       await scheduleNotification(
@@ -187,8 +183,25 @@ class FirestoreService {
   // Get all courses
   Stream<List<Course>> getCourses() {
     return coursesCollection.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Course.fromFirestore(doc)).toList()
+        snapshot.docs.map((doc) => Course.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
     );
+  }
+
+  // Get a single course by its ID
+  Future<Course?> getCourse(String courseId) async {
+    try {
+      final docSnapshot = await coursesCollection.doc(courseId).get();
+      if (docSnapshot.exists) {
+        return Course.fromFirestore(docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching course: $e');
+      }
+      rethrow;
+    }
   }
 
   // Get topics for a specific course
@@ -271,18 +284,6 @@ class FirestoreService {
         print('Error submitting feedback or sending email response: $e');
       }
       rethrow;
-    }
-  }
-
-  // Send email response using Firebase Functions
-  Future<void> sendEmailResponse(String email) async {
-    try {
-      final HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail'); // Make sure the function name matches your deployed function
-      await callable.call(<String, dynamic>{
-        'email': email,
-      });
-    } catch (e) {
-      debugPrint('Failed to send email response: $e');
     }
   }
 }

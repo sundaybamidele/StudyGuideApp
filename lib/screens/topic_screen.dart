@@ -6,7 +6,7 @@ import '../models/topic.dart';
 class TopicScreen extends StatelessWidget {
   final String topicId; // The ID of the topic to be edited or viewed
 
-  const TopicScreen({super.key, required this.topicId});
+  const TopicScreen({super.key, required this.topicId, required String courseId});
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +48,7 @@ class TopicScreen extends StatelessWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Options:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                ...topic.options.map((option) => Text(
-                  option,
-                  style: const TextStyle(fontSize: 16),
-                )),
+                // Removed Options section
               ],
             ),
           ),
