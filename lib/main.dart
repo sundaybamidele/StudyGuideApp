@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/course_screen.dart';
+import 'screens/course_screen.dart'; // Make sure this is correct
 import 'screens/study_materials_screen.dart';
 import 'screens/assessment_screen.dart';
 import 'screens/login_screen.dart';
@@ -47,7 +47,8 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => const SplashScreen(),
           '/home': (context) => HomeScreen(),
-          '/courses': (context) => CourseScreen(course: Course(id: 'placeholder', title: 'Sample Course', description: 'Description')), // Replace with a valid Course object
+          // Make sure to use a valid Course object or handle the CourseScreen initialization differently
+          '/courses': (context) => CourseScreen(courseId: 'sample_course_id'), // Adjust to your needs
           '/study_materials': (context) => const StudyMaterialsScreen(),
           '/assessment': (context) => const AssessmentScreen(),
           '/login': (context) => LoginScreen(),

@@ -68,13 +68,21 @@ class FirestoreService {
   }
 
   // Create a new topic
-  Future<void> createTopic(String courseId, String title, String content, int duration) async {
+  Future<void> createTopic({
+    required String courseId,
+    required String title,
+    required String content,
+    required int duration,
+    required List<String> options,
+  }) async {
     try {
       var docRef = await topicsCollection.add({
         'course_id': courseId,
         'title': title,
         'content': content,
         'duration': duration,
+        'completed': false, // Initialize as not completed
+        'options': options, // Store options
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -96,12 +104,19 @@ class FirestoreService {
   }
 
   // Update an existing topic
-  Future<void> updateTopic(String topicId, String title, String content, int duration) async {
+  Future<void> updateTopic({
+    required String topicId,
+    required String title,
+    required String content,
+    required int duration,
+    required List<String> options,
+  }) async {
     try {
       await topicsCollection.doc(topicId).update({
         'title': title,
         'content': content,
         'duration': duration,
+        'options': options, // Update options
         'updated_at': FieldValue.serverTimestamp(),
       });
       await scheduleNotification(
@@ -136,6 +151,24 @@ class FirestoreService {
     }
   }
 
+  // Update topic completion status
+  Future<void> updateTopicCompletion(String topicId, bool completed) async {
+    try {
+      await topicsCollection.doc(topicId).update({
+        'completed': completed,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('Topic completion status updated successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating topic completion status: $e');
+      }
+      rethrow;
+    }
+  }
+
   // Save assessment result
   Future<void> saveAssessmentResult(AssessmentResult result) async {
     try {
@@ -163,6 +196,23 @@ class FirestoreService {
     return topicsCollection.where('course_id', isEqualTo: courseId).snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
     );
+  }
+
+  // Get a single topic by its ID
+  Future<Topic?> getTopic(String topicId) async {
+    try {
+      final docSnapshot = await topicsCollection.doc(topicId).get();
+      if (docSnapshot.exists) {
+        return Topic.fromFirestore(docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching topic: $e');
+      }
+      rethrow;
+    }
   }
 
   // Get assessment results

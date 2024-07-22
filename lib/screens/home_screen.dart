@@ -7,6 +7,7 @@ import 'study_materials_screen.dart';
 import 'assessment_screen.dart';
 import 'reminder_screen.dart';
 import 'login_screen.dart';
+import 'feedback_screen.dart'; // Import FeedbackScreen
 
 class HomeScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
@@ -73,6 +74,16 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ReminderScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.feedback),
+              title: const Text('Feedback'), // Add Feedback menu item
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FeedbackScreen()),
                 );
               },
             ),
