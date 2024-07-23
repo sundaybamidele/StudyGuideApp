@@ -1,71 +1,94 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
-import '../widgets/custom_button.dart';
 
-class RegistrationScreen extends StatelessWidget {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class RegistrationScreen extends StatefulWidget {
+  const RegistrationScreen({super.key});
 
-  RegistrationScreen({super.key});
+  @override
+  _RegistrationScreenState createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
-    AuthService authService = Provider.of<AuthService>(context);
+    final authService = Provider.of<AuthService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => value!.isEmpty ? 'Enter email' : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
               ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) => value!.isEmpty ? 'Enter password' : null,
-              ),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm Password'),
-                obscureText: true,
-                validator: (value) =>
-                    value != _passwordController.text ? 'Passwords do not match' : null,
-              ),
-              const SizedBox(height: 20),
-              CustomButton(
-                text: 'Register',
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    bool success = await authService.register(
-                        _emailController.text, _passwordController.text);
-                    if (success) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _confirmPasswordController,
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ElevatedButton(
+                    onPressed: () async {
+                      if (_passwordController.text != _confirmPasswordController.text) {
+                        setState(() {
+                          _errorMessage = 'Passwords do not match.';
+                        });
+                        return;
+                      }
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      final user = await authService.register(
+                        _emailController.text,
+                        _passwordController.text,
                       );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Registration Failed')));
-                    }
-                  }
-                },
-              ),
-            ],
-          ),
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      if (user != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Registration successful')),
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        );
+                      } else {
+                        setState(() {
+                          _errorMessage = 'Failed to register. Please try again.';
+                        });
+                      }
+                    },
+                    child: const Text('Register'),
+                  ),
+          ],
         ),
       ),
     );

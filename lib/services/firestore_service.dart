@@ -5,12 +5,14 @@ import 'package:studyguideapp/services/notification_service.dart';
 import '../models/course.dart';
 import '../models/topic.dart';
 import '../models/assessment_result.dart'; // Import the assessment result model
+import '../models/user.dart'; // Import the user profile model
 
 class FirestoreService {
   final CollectionReference coursesCollection = FirebaseFirestore.instance.collection('courses');
   final CollectionReference topicsCollection = FirebaseFirestore.instance.collection('topics');
   final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results'); // New collection for assessment results
   final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback'); // New collection for feedback
+  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users'); // Collection for user profiles
   final FirebaseFunctions functions = FirebaseFunctions.instance; // Initialize Firebase Functions
 
   // Create a new course
@@ -296,6 +298,38 @@ class FirestoreService {
       });
     } catch (e) {
       debugPrint('Failed to send email response: $e');
+    }
+  }
+
+  // Get user profile
+  Future<UserProfile?> getUserProfile(String userId) async {
+    try {
+      final docSnapshot = await usersCollection.doc(userId).get();
+      if (docSnapshot.exists) {
+        return UserProfile.fromFirestore(docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching user profile: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Update user profile
+  Future<void> updateUserProfile(UserProfile userProfile) async {
+    try {
+      await usersCollection.doc(userProfile.id).update(userProfile.toMap());
+      if (kDebugMode) {
+        print('User profile updated successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating user profile: $e');
+      }
+      rethrow;
     }
   }
 }
