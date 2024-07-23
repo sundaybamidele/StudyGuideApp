@@ -1,12 +1,12 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'services/auth_service.dart';
-import 'services/firestore_service.dart';
-import 'screens/home_screen.dart';
+import 'services/firestore_service.dart'; // Import FirestoreService
+import 'screens/user_profile_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/registration_screen.dart';
-import 'screens/splash_screen.dart';
+import 'screens/home_screen.dart'; // Import HomeScreen
+import 'screens/splash_screen.dart'; // Import SplashScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +15,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        Provider(create: (_) => FirestoreService()),
+        Provider(create: (_) => FirestoreService()), // Add FirestoreService provider
       ],
       child: const MyApp(),
     ),
@@ -32,12 +32,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      home: const SplashScreen(), // Set SplashScreen as the initial screen
       routes: {
-        '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
-        '/register': (context) => const RegistrationScreen(),
         '/home': (context) => const HomeScreen(),
+        '/profile': (context) => const UserProfileScreen(),
+        // Add other routes if needed
       },
     );
   }

@@ -1,8 +1,10 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
 import 'login_screen.dart';
+import 'home_screen.dart'; // Ensure this screen exists
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,22 +17,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuthState();
+    _navigateBasedOnAuthState();
   }
 
-  _checkAuthState() async {
-    await Future.delayed(const Duration(seconds: 3));
+  _navigateBasedOnAuthState() async {
     final authService = Provider.of<AuthService>(context, listen: false);
+    await Future.delayed(const Duration(seconds: 3), () {});
+
     if (authService.currentUser != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
