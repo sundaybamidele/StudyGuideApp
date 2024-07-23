@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class StudyGuideScreen extends StatelessWidget {
-  const StudyGuideScreen({super.key});
+class AboutScreen extends StatelessWidget {
+  const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,7 @@ class StudyGuideScreen extends StatelessWidget {
         title: const Text('Study Guide'),
       ),
       body: const Center(
-        child: Text('Study Guide Screen'),
+        child: Text('About Study Guide Application'),
       ),
     );
   }
