@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/firestore_service.dart';
+import 'package:studyguideapp/services/firestore_service.dart';
 
 class CreateTopicScreen extends StatefulWidget {
   final String courseId;
+  final String? topicId;
+  final String? initialTitle;
+  final String? initialContent;
+  final int? initialDuration;
 
-  const CreateTopicScreen({super.key, required this.courseId});
+  const CreateTopicScreen({
+    required this.courseId,
+    this.topicId,
+    this.initialTitle,
+    this.initialContent,
+    this.initialDuration,
+    super.key,
+  });
 
   @override
-  // ignore: library_private_types_in_public_api
   _CreateTopicScreenState createState() => _CreateTopicScreenState();
 }
 
@@ -16,6 +26,16 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _durationController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.topicId != null) {
+      _titleController.text = widget.initialTitle ?? '';
+      _contentController.text = widget.initialContent ?? '';
+      _durationController.text = widget.initialDuration?.toString() ?? '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,16 +72,28 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
 
                 if (title.isNotEmpty && content.isNotEmpty && duration > 0) {
                   try {
-                    await firestoreService.createTopic(
-                      courseId: widget.courseId,
-                      title: title,
-                      content: content,
-                      duration: duration,
-                    );
-                    Navigator.pop(context); // Navigate back to the CourseScreen
+                    if (widget.topicId == null) {
+                      // Creating a new topic
+                      await firestoreService.createTopic(
+                        courseId: widget.courseId,
+                        title: title,
+                        content: content,
+                        duration: duration,
+                      );
+                    } else {
+                      // Updating an existing topic
+                      await firestoreService.updateTopic(
+                        courseId: widget.courseId,
+                        topicId: widget.topicId!,
+                        title: title,
+                        content: content,
+                        duration: duration,
+                      );
+                    }
+                    Navigator.pop(context); // Navigate back to the TopicListScreen
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating topic: $e')),
+                      SnackBar(content: Text('Error creating/updating topic: $e')),
                     );
                   }
                 } else {

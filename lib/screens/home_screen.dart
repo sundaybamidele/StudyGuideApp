@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:studyguideapp/screens/course_list_screen.dart';
 import '../services/auth_service.dart';
 import 'feedback_screen.dart';
 import 'assessment_screen.dart';
@@ -86,6 +87,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(builder: (context) => const FeedbackScreen()),
                     ),
                   ),
+                  _buildGridItem(
+  context,
+  'Manage Course',
+  Icons.school,
+  () => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => CourseListScreen()),
+  ),
+),
                   _buildGridItem(
                     context,
                     'Assessment',

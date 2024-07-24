@@ -108,7 +108,7 @@ class FirestoreService {
     required String topicId,
     required String title,
     required String content,
-    required int duration,
+    required int duration, required String courseId,
   }) async {
     try {
       await topicsCollection.doc(topicId).update({

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:studyguideapp/models/course.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
 
 class CreateCourseScreen extends StatefulWidget {
-  final Course? course; // Optional parameter if editing an existing course
+  final String? courseId;
+  final String? initialTitle;
+  final String? initialDescription;
 
-  const CreateCourseScreen({super.key, this.course});
+  const CreateCourseScreen({
+    super.key,
+    this.courseId,
+    this.initialTitle,
+    this.initialDescription,
+  });
 
   @override
-  // ignore: library_private_types_in_public_api
   _CreateCourseScreenState createState() => _CreateCourseScreenState();
 }
 
@@ -20,9 +25,9 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.course != null) {
-      _titleController.text = widget.course!.title;
-      _descriptionController.text = widget.course!.description;
+    if (widget.courseId != null) {
+      _titleController.text = widget.initialTitle ?? '';
+      _descriptionController.text = widget.initialDescription ?? '';
     }
   }
 
@@ -55,13 +60,13 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
 
                 if (title.isNotEmpty && description.isNotEmpty) {
                   try {
-                    if (widget.course == null) {
+                    if (widget.courseId == null) {
                       // Creating a new course
                       await firestoreService.createCourse(title, description);
                     } else {
                       // Updating an existing course
                       await firestoreService.updateCourse(
-                        widget.course!.id,
+                        widget.courseId!,
                         title,
                         description,
                       );
@@ -78,7 +83,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                   );
                 }
               },
-              child: Text(widget.course == null ? 'Create Course' : 'Update Course'),
+              child: Text(widget.courseId == null ? 'Create Course' : 'Update Course'),
             ),
           ],
         ),
