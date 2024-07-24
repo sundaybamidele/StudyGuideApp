@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:url_launcher/url_launcher.dart';
 import 'package:studyguideapp/screens/course_list_screen.dart';
 import '../services/auth_service.dart';
 import 'feedback_screen.dart';
@@ -10,7 +13,6 @@ import 'assessment_screen.dart';
 import 'reminder_screen.dart';
 import 'study_materials_screen.dart';
 import 'user_profile_screen.dart';
-import 'create_course_screen.dart';
 import 'about_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late String _userName;
   late DateTime _currentDateTime;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -35,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateTime() {
-    Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       setState(() {
         _currentDateTime = DateTime.now();
       });
@@ -43,10 +46,125 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Screen'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CircleAvatar(
+                    radius: 40,
+                    backgroundImage: NetworkImage(
+                      'https://via.placeholder.com/150', // Placeholder image URL for the user's profile picture
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _userName,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Feedback',
+              Icons.feedback,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FeedbackScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Manage Course',
+              Icons.school,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CourseListScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Assessment',
+              Icons.assignment,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AssessmentScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Reminder',
+              Icons.alarm,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ReminderScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Study Materials',
+              Icons.book,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StudyMaterialsScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Profile',
+              Icons.person,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'About',
+              Icons.info,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Logout',
+              Icons.logout,
+              () async {
+                final authService = Provider.of<AuthService>(context, listen: false);
+                await authService.signOut();
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -88,14 +206,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   _buildGridItem(
-  context,
-  'Manage Course',
-  Icons.school,
-  () => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const CourseListScreen()),
-  ),
-),
+                    context,
+                    'Manage Course',
+                    Icons.school,
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CourseListScreen()),
+                    ),
+                  ),
                   _buildGridItem(
                     context,
                     'Assessment',
@@ -125,39 +243,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   _buildGridItem(
                     context,
-                    'Profile',
-                    Icons.person,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                    ),
+                    'MY WLV',
+                    Icons.web,
+                    () => _launchURL('https://my.wlv.ac.uk/dashboard/home'),
                   ),
                   _buildGridItem(
                     context,
-                    'Create Course',
-                    Icons.add_box,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CreateCourseScreen()),
-                    ),
+                    'Restart',
+                    Icons.restart_alt,
+                    () {
+                      setState(() {
+                        _currentDateTime = DateTime.now();
+                      });
+                    },
                   ),
                   _buildGridItem(
                     context,
-                    'About',
-                    Icons.info,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AboutScreen()),
-                    ),
-                  ),
-                  _buildGridItem(
-                    context,
-                    'Logout',
-                    Icons.logout,
-                    () async {
-                      final authService = Provider.of<AuthService>(context, listen: false);
-                      await authService.signOut();
-                      Navigator.pushReplacementNamed(context, '/login');
+                    'Exit',
+                    Icons.exit_to_app,
+                    () {
+                      Navigator.pop(context);
                     },
                   ),
                 ],
@@ -186,6 +291,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title, style: Theme.of(context).textTheme.titleLarge),
+      onTap: onTap,
     );
   }
 }
