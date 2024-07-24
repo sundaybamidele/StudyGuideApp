@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Icons.school,
   () => Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => CourseListScreen()),
+    MaterialPageRoute(builder: (context) => const CourseListScreen()),
   ),
 ),
                   _buildGridItem(

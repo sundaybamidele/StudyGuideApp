@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:studyguideapp/models/course.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
 
 class CreateCourseScreen extends StatefulWidget {
-  final String? courseId;
-  final String? initialTitle;
-  final String? initialDescription;
+  final Course? course; // Optional parameter if editing an existing course
 
-  const CreateCourseScreen({
-    super.key,
-    this.courseId,
-    this.initialTitle,
-    this.initialDescription,
-  });
+  const CreateCourseScreen({super.key, this.course});
 
   @override
   _CreateCourseScreenState createState() => _CreateCourseScreenState();
@@ -25,9 +19,9 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.courseId != null) {
-      _titleController.text = widget.initialTitle ?? '';
-      _descriptionController.text = widget.initialDescription ?? '';
+    if (widget.course != null) {
+      _titleController.text = widget.course!.title;
+      _descriptionController.text = widget.course!.description;
     }
   }
 
@@ -37,7 +31,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Course'),
+        title: Text(widget.course == null ? 'Create Course' : 'Edit Course'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -60,13 +54,13 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
 
                 if (title.isNotEmpty && description.isNotEmpty) {
                   try {
-                    if (widget.courseId == null) {
+                    if (widget.course == null) {
                       // Creating a new course
                       await firestoreService.createCourse(title, description);
                     } else {
                       // Updating an existing course
                       await firestoreService.updateCourse(
-                        widget.courseId!,
+                        widget.course!.id,
                         title,
                         description,
                       );
@@ -83,7 +77,7 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                   );
                 }
               },
-              child: Text(widget.courseId == null ? 'Create Course' : 'Update Course'),
+              child: Text(widget.course == null ? 'Create Course' : 'Update Course'),
             ),
           ],
         ),
