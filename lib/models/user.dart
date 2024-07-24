@@ -1,33 +1,31 @@
-// ignore: unused_import
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserProfile {
-  final String id;
-  final String email;
+  final String uid;
   final String name;
-  final String profilePictureUrl;
+  final String email;
+  final String photoUrl;
 
   UserProfile({
-    required this.id,
-    required this.email,
+    required this.uid,
     required this.name,
-    required this.profilePictureUrl,
+    required this.email,
+    required this.photoUrl,
   });
 
-  factory UserProfile.fromFirestore(Map<String, dynamic> data, String id) {
+  factory UserProfile.fromFirestore(Map<String, dynamic> data) {
     return UserProfile(
-      id: id,
-      email: data['email'] ?? '',
+      uid: data['uid'] ?? '',
       name: data['name'] ?? '',
-      profilePictureUrl: data['profilePictureUrl'] ?? '',
+      email: data['email'] ?? '',
+      photoUrl: data['photo_url'] ?? '',
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {
-      'email': email,
+      'uid': uid,
       'name': name,
-      'profilePictureUrl': profilePictureUrl,
+      'email': email,
+      'photo_url': photoUrl,
     };
   }
 }

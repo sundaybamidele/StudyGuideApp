@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:studyguideapp/services/firestore_service.dart';
+import '../services/firestore_service.dart';
 
 class CreateTopicScreen extends StatefulWidget {
   final String courseId;
@@ -43,7 +43,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Topic'),
+        title: Text(widget.topicId == null ? 'Create Topic' : 'Update Topic'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,7 +73,6 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                 if (title.isNotEmpty && content.isNotEmpty && duration > 0) {
                   try {
                     if (widget.topicId == null) {
-                      // Creating a new topic
                       await firestoreService.createTopic(
                         courseId: widget.courseId,
                         title: title,
@@ -81,19 +80,17 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                         duration: duration,
                       );
                     } else {
-                      // Updating an existing topic
                       await firestoreService.updateTopic(
-                        courseId: widget.courseId,
                         topicId: widget.topicId!,
                         title: title,
                         content: content,
                         duration: duration,
                       );
                     }
-                    Navigator.pop(context); // Navigate back to the TopicListScreen
+                    Navigator.pop(context); // Navigate back to the previous screen
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating/updating topic: $e')),
+                      SnackBar(content: Text('Error saving topic: $e')),
                     );
                   }
                 } else {
@@ -102,7 +99,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                   );
                 }
               },
-              child: const Text('Create Topic'),
+              child: Text(widget.topicId == null ? 'Create Topic' : 'Update Topic'),
             ),
           ],
         ),

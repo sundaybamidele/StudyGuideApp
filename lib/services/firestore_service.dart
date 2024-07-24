@@ -108,7 +108,7 @@ class FirestoreService {
     required String topicId,
     required String title,
     required String content,
-    required int duration, required String courseId,
+    required int duration,
   }) async {
     try {
       await topicsCollection.doc(topicId).update({
@@ -262,51 +262,52 @@ class FirestoreService {
 
       await feedbackCollection.add({
         'email': email,
-        'usefulnessRating': usefulnessRating,
-        'usageFrequency': usageFrequency,
-        'gradesImprovement': gradesImprovement,
-        'navigationEaseRating': navigationEaseRating,
-        'satisfactionRating': satisfactionRating,
-        'organizationEffect': organizationEffect,
-        'contentQualityRating': contentQualityRating,
+        'usefulness_rating': usefulnessRating,
+        'usage_frequency': usageFrequency,
+        'grades_improvement': gradesImprovement,
+        'navigation_ease_rating': navigationEaseRating,
+        'satisfaction_rating': satisfactionRating,
+        'organization_effect': organizationEffect,
+        'content_quality_rating': contentQualityRating,
         'recommendation': recommendation,
         'suggestions': suggestions,
-        'additionalComments': additionalComments,
-        'timestamp': FieldValue.serverTimestamp(),
+        'additional_comments': additionalComments,
+        'submitted_at': FieldValue.serverTimestamp(),
       });
 
-      // Call the Firebase Function to send an email response
-      await sendEmailResponse(email);
+      // Send email response using Firebase Functions
+      HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail');
+      await callable.call({
+        'email': email,
+        'usefulness_rating': usefulnessRating,
+        'usage_frequency': usageFrequency,
+        'grades_improvement': gradesImprovement,
+        'navigation_ease_rating': navigationEaseRating,
+        'satisfaction_rating': satisfactionRating,
+        'organization_effect': organizationEffect,
+        'content_quality_rating': contentQualityRating,
+        'recommendation': recommendation,
+        'suggestions': suggestions,
+        'additional_comments': additionalComments,
+      });
 
       if (kDebugMode) {
-        print('Feedback submitted and email response sent successfully');
+        print('Feedback submitted successfully and email response sent');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error submitting feedback or sending email response: $e');
+        print('Error submitting feedback and sending email response: $e');
       }
       rethrow;
     }
   }
 
-  // Send email response using Firebase Functions
-  Future<void> sendEmailResponse(String email) async {
+  // Get user profile data
+  Future<UserProfile?> getUserProfile(String uid) async {
     try {
-      final HttpsCallable callable = functions.httpsCallable('sendFeedbackEmail'); // Make sure the function name matches your deployed function
-      await callable.call(<String, dynamic>{
-        'email': email,
-      });
-    } catch (e) {
-      debugPrint('Failed to send email response: $e');
-    }
-  }
-
-  // Get user profile
-  Future<UserProfile?> getUserProfile(String userId) async {
-    try {
-      final docSnapshot = await usersCollection.doc(userId).get();
+      final docSnapshot = await usersCollection.doc(uid).get();
       if (docSnapshot.exists) {
-        return UserProfile.fromFirestore(docSnapshot.data() as Map<String, dynamic>, docSnapshot.id);
+        return UserProfile.fromFirestore(docSnapshot.data() as Map<String, dynamic>);
       } else {
         return null;
       }
@@ -318,10 +319,10 @@ class FirestoreService {
     }
   }
 
-  // Update user profile
+  // Update user profile data
   Future<void> updateUserProfile(UserProfile userProfile) async {
     try {
-      await usersCollection.doc(userProfile.id).update(userProfile.toMap());
+      await usersCollection.doc(userProfile.uid).set(userProfile.toFirestore());
       if (kDebugMode) {
         print('User profile updated successfully');
       }
