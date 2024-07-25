@@ -1,18 +1,11 @@
-// ignore_for_file: deprecated_member_use
-<<<<<<< HEAD
-=======
-
-import 'dart:async';
->>>>>>> 0c80be1f92d6bfe2b4faae4447088ac2fd681cc8
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:url_launcher/url_launcher.dart';
-import 'package:studyguideapp/screens/course_list_screen.dart';
 import '../services/auth_service.dart';
 import 'feedback_screen.dart';
+import 'course_list_screen.dart';
 import 'assessment_screen.dart';
 import 'reminder_screen.dart';
 import 'study_materials_screen.dart';
@@ -72,20 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -96,11 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: CircleAvatar(
               backgroundImage: NetworkImage(_userPhotoUrl),
               radius: 20,
-              onBackgroundImageError: (_, __) {
-                setState(() {
-                  _userPhotoUrl = 'https://via.placeholder.com/150'; // Fallback placeholder
-                });
-              },
             ),
           ),
         ],
@@ -119,11 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   CircleAvatar(
                     radius: 40,
                     backgroundImage: NetworkImage(_userPhotoUrl),
-                    onBackgroundImageError: (_, __) {
-                      setState(() {
-                        _userPhotoUrl = 'https://via.placeholder.com/150'; // Fallback placeholder
-                      });
-                    },
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -218,107 +187,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150', // Placeholder image URL for the user's profile picture
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _userName,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Feedback',
-              Icons.feedback,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FeedbackScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Manage Course',
-              Icons.school,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CourseListScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Assessment',
-              Icons.assignment,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AssessmentScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Reminder',
-              Icons.alarm,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ReminderScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Study Materials',
-              Icons.book,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const StudyMaterialsScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Profile',
-              Icons.person,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'About',
-              Icons.info,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
-              ),
-            ),
-            _buildDrawerItem(
-              context,
-              'Logout',
-              Icons.logout,
-              () async {
-                final authService = Provider.of<AuthService>(context, listen: false);
-                await authService.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            ),
-          ],
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -397,29 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildGridItem(
                     context,
                     'MY WLV',
-                    Icons.web,
+                    'assets/images/app_icon.png', // Use the local asset
                     () => _launchURL('https://my.wlv.ac.uk/dashboard/home'),
-<<<<<<< HEAD
-=======
-                  ),
-                  _buildGridItem(
-                    context,
-                    'Restart',
-                    Icons.restart_alt,
-                    () {
-                      setState(() {
-                        _currentDateTime = DateTime.now();
-                      });
-                    },
-                  ),
-                  _buildGridItem(
-                    context,
-                    'Exit',
-                    Icons.exit_to_app,
-                    () {
-                      Navigator.pop(context);
-                    },
->>>>>>> 0c80be1f92d6bfe2b4faae4447088ac2fd681cc8
                   ),
                 ],
               ),
@@ -433,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildGridItem(
     BuildContext context,
     String title,
-    IconData icon,
+    dynamic iconOrAssetPath,
     VoidCallback onTap,
   ) {
     return GestureDetector(
@@ -442,7 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40.0),
+            iconOrAssetPath is String
+                ? Image.asset(iconOrAssetPath, width: 40.0, height: 40.0)
+                : Icon(iconOrAssetPath, size: 40.0),
             Text(title, style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
