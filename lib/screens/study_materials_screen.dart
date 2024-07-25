@@ -7,127 +7,10 @@ class StudyMaterialsScreen extends StatelessWidget {
   const StudyMaterialsScreen({super.key});
 
   @override
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   Widget build(BuildContext context) {
-    StorageService storageService = Provider.of<StorageService>(context);
+    // Fetch the StorageService provider
+    final storageService = Provider.of<StorageService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Study Materials'),
@@ -135,10 +18,14 @@ class StudyMaterialsScreen extends StatelessWidget {
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: storageService.listFiles(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
             final files = snapshot.data;
             return ListView.builder(
-              itemCount: files?.length,
+              itemCount: files?.length ?? 0,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(files?[index]['name'] ?? ''),
@@ -149,7 +36,7 @@ class StudyMaterialsScreen extends StatelessWidget {
               },
             );
           } else {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: Text('No files found'));
           }
         },
       ),

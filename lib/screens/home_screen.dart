@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // For date formatting
@@ -24,17 +23,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late String _userName;
+  late String _userPhotoUrl;
   late DateTime _currentDateTime;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final user = authService.currentUser;
-    _userName = user?.displayName ?? 'User';
     _currentDateTime = DateTime.now();
     _updateTime();
+    _loadUserData();
   }
 
   void _updateTime() {
@@ -42,6 +40,15 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _currentDateTime = DateTime.now();
       });
+    });
+  }
+
+  void _loadUserData() {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
+    setState(() {
+      _userName = user?.displayName ?? 'User';
+      _userPhotoUrl = user?.photoURL ?? 'https://via.placeholder.com/150'; // Placeholder image URL if no profile picture
     });
   }
 
@@ -64,6 +71,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Screen'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(_userPhotoUrl),
+              radius: 20,
+              onBackgroundImageError: (_, __) {
+                setState(() {
+                  _userPhotoUrl = 'https://via.placeholder.com/150'; // Fallback placeholder
+                });
+              },
+            ),
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -76,11 +97,14 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 40,
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150', // Placeholder image URL for the user's profile picture
-                    ),
+                    backgroundImage: NetworkImage(_userPhotoUrl),
+                    onBackgroundImageError: (_, __) {
+                      setState(() {
+                        _userPhotoUrl = 'https://via.placeholder.com/150'; // Fallback placeholder
+                      });
+                    },
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -152,6 +176,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
               ),
+            ),
+            _buildDrawerItem(
+              context,
+              'Exit',
+              Icons.exit_to_app,
+              () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context); // Navigate back
+              },
             ),
             _buildDrawerItem(
               context,
@@ -246,24 +279,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     'MY WLV',
                     Icons.web,
                     () => _launchURL('https://my.wlv.ac.uk/dashboard/home'),
-                  ),
-                  _buildGridItem(
-                    context,
-                    'Restart',
-                    Icons.restart_alt,
-                    () {
-                      setState(() {
-                        _currentDateTime = DateTime.now();
-                      });
-                    },
-                  ),
-                  _buildGridItem(
-                    context,
-                    'Exit',
-                    Icons.exit_to_app,
-                    () {
-                      Navigator.pop(context);
-                    },
                   ),
                 ],
               ),
