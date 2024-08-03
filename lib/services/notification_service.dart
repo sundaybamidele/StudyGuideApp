@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -30,10 +31,13 @@ Future<void> scheduleNotification(int id, String title, String body, int minutes
       androidScheduleMode: AndroidScheduleMode.exact,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
-    // ignore: avoid_print
-    print('Notification scheduled successfully.');
+    if (kDebugMode) {
+      print('Notification scheduled successfully');
+    }
   } catch (e) {
-    // ignore: avoid_print
-    print('Error scheduling notification: $e');
+    if (kDebugMode) {
+      print('Error scheduling notification: $e');
+    }
+    rethrow;
   }
 }
