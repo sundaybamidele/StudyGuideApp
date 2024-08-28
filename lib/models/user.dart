@@ -11,7 +11,6 @@ class UserProfile {
     this.profilePictureUrl,
   });
 
-  // Convert a UserProfile instance to a map
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -21,7 +20,6 @@ class UserProfile {
     };
   }
 
-  // Create a UserProfile instance from a map
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
       uid: map['uid'] as String,

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
 import 'package:flutter/foundation.dart';
 
 class AuthService extends ChangeNotifier {
@@ -21,8 +22,17 @@ class AuthService extends ChangeNotifier {
         email: email,
         password: password,
       );
+      final user = userCredential.user;
+      if (user != null) {
+        // Create or update a user document in Firestore
+        await FirebaseFirestore.instance.collection('user_profiles').doc(user.uid).set({
+          'email': email,
+          'displayName': user.displayName ?? '',
+          'photoURL': user.photoURL ?? '',
+        }, SetOptions(merge: true)); // Use merge to update existing documents
+      }
       notifyListeners();  // Notify listeners of the change
-      return userCredential.user;
+      return user;
     } catch (e) {
       // Handle registration errors
       if (kDebugMode) {
@@ -65,6 +75,13 @@ class AuthService extends ChangeNotifier {
         // ignore: deprecated_member_use
         await user.updateEmail(email);
         await user.reload();
+
+        // Update user document in Firestore
+        await FirebaseFirestore.instance.collection('user_profiles').doc(user.uid).update({
+          'displayName': displayName,
+          'email': email,
+        });
+
         notifyListeners();  // Notify listeners of the change
       } catch (e) {
         if (kDebugMode) {

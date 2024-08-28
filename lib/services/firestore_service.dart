@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import for local notifications
-import 'package:timezone/timezone.dart' as tz; // Import for timezone
 import '../models/course.dart';
 import '../models/topic.dart';
 import '../models/assessment_result.dart'; // Import the assessment result model
@@ -16,21 +14,7 @@ class FirestoreService {
   final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users'); // Collection for user profiles
   final FirebaseFunctions functions = FirebaseFunctions.instance; // Initialize Firebase Functions
 
-  // Initialize FlutterLocalNotificationsPlugin
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  FirestoreService() {
-    _initializeNotifications();
-  }
-
-  void _initializeNotifications() {
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: null,
-    );
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
+  FirestoreService();
 
   // Create a new course
   Future<void> createCourse(String title, String description) async {
@@ -94,7 +78,7 @@ class FirestoreService {
     required int duration,
   }) async {
     try {
-      var docRef = await topicsCollection.add({
+      await topicsCollection.add({
         'course_id': courseId,
         'title': title,
         'content': content,
@@ -103,12 +87,6 @@ class FirestoreService {
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
-      await scheduleNotification(
-        docRef.id.hashCode,
-        title,
-        'Study this topic now!',
-        duration,
-      );
       if (kDebugMode) {
         print('Topic created successfully');
       }
@@ -134,12 +112,6 @@ class FirestoreService {
         'duration': duration,
         'updated_at': FieldValue.serverTimestamp(),
       });
-      await scheduleNotification(
-        topicId.hashCode,
-        title,
-        'Study this topic now!',
-        duration,
-      );
       if (kDebugMode) {
         print('Topic updated successfully');
       }
@@ -339,7 +311,7 @@ class FirestoreService {
     }
   }
 
-  // Get a single user profile by UID
+  // Fetch a user profile by ID
   Future<UserProfile?> getUserProfile(String uid) async {
     try {
       final docSnapshot = await usersCollection.doc(uid).get();
@@ -351,44 +323,6 @@ class FirestoreService {
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching user profile: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Get all user profiles
-  Stream<List<UserProfile>> getAllUserProfiles() {
-    return usersCollection.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => UserProfile.fromMap(doc.data() as Map<String, dynamic>)).toList()
-    );
-  }
-
-  // Helper method to schedule notifications
-  Future<void> scheduleNotification(int id, String title, String body, int minutes) async {
-    try {
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        tz.TZDateTime.now(tz.local).add(Duration(minutes: minutes)),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'your_channel_id',
-            'Your Channel Name',
-            channelDescription: 'Your channel description',
-            importance: Importance.max,
-            priority: Priority.high,
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exact,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      );
-      if (kDebugMode) {
-        print('Notification scheduled successfully.');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error scheduling notification: $e');
       }
       rethrow;
     }

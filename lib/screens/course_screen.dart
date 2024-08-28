@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:studyguideapp/screens/create_topic_screen.dart';
-// ignore: unused_import
-import '../models/course.dart';
-import '../models/topic.dart'; // Import the Topic model
+import '../models/topic.dart';
 import '../services/firestore_service.dart';
 
 class CourseScreen extends StatefulWidget {
   final String courseId;
 
-  // ignore: use_super_parameters
-  const CourseScreen({Key? key, required this.courseId}) : super(key: key);
+  const CourseScreen({super.key, required this.courseId});
 
   @override
-  // ignore: library_private_types_in_public_api
   _CourseScreenState createState() => _CourseScreenState();
 }
 

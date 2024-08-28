@@ -4,7 +4,7 @@ import 'package:studyguideapp/models/course.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
 
 class CreateCourseScreen extends StatefulWidget {
-  final Course? course; // Optional parameter if editing an existing course
+  final Course? course;
 
   const CreateCourseScreen({super.key, this.course});
 
@@ -55,10 +55,8 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                 if (title.isNotEmpty && description.isNotEmpty) {
                   try {
                     if (widget.course == null) {
-                      // Creating a new course
                       await firestoreService.createCourse(title, description);
                     } else {
-                      // Updating an existing course
                       await firestoreService.updateCourse(
                         widget.course!.id,
                         title,

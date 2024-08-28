@@ -4,7 +4,7 @@ class Topic {
   final String title;
   final String content;
   final int duration;
-  final bool completed; // Add the completed field
+  final bool completed; // New completed field
 
   Topic({
     required this.id,
@@ -24,5 +24,15 @@ class Topic {
       duration: data['duration'] ?? 0,
       completed: data['completed'] ?? false, // Parse completed
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'course_id': courseId,
+      'title': title,
+      'content': content,
+      'duration': duration,
+      'completed': completed, // Include completed field in map
+    };
   }
 }
