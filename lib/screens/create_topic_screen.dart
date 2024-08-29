@@ -40,6 +40,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
+    const userId = ''; // Get the current user's ID from your auth service
 
     return Scaffold(
       appBar: AppBar(
@@ -78,6 +79,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                         title: title,
                         content: content,
                         duration: duration,
+                        userId: userId, // Pass the userId
                       );
                     } else {
                       await firestoreService.updateTopic(
@@ -85,6 +87,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                         title: title,
                         content: content,
                         duration: duration,
+                        userId: userId, // Pass the userId
                       );
                     }
                     Navigator.pop(context); // Navigate back to the previous screen

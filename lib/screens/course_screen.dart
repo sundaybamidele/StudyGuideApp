@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'package:studyguideapp/screens/create_topic_screen.dart';
 import '../models/topic.dart';
 import '../services/firestore_service.dart';
+import '../services/auth_service.dart'; // Import AuthService to get the current user
 
 class CourseScreen extends StatefulWidget {
   final String courseId;
@@ -19,7 +21,16 @@ class _CourseScreenState extends State<CourseScreen> {
   @override
   void initState() {
     super.initState();
-    _topicsStream = _firestoreService.getTopics(widget.courseId);
+
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid;
+
+    if (userId != null) {
+      _topicsStream = _firestoreService.getTopics(widget.courseId, userId); // Pass both courseId and userId
+    } else {
+      // Handle case where userId is null, if needed
+      _topicsStream = const Stream.empty(); // Provide an empty stream to avoid errors
+    }
   }
 
   @override

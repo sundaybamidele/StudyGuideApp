@@ -8,7 +8,6 @@ class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ReminderScreenState createState() => _ReminderScreenState();
 }
 
@@ -16,13 +15,14 @@ class _ReminderScreenState extends State<ReminderScreen> {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
+    const userId = 'USER_ID'; // Replace with actual user ID retrieval logic
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reminders'),
       ),
       body: StreamBuilder<List<Course>>(
-        stream: firestoreService.getCourses(),
+        stream: firestoreService.getCourses(userId), // Provide userId here
         builder: (context, courseSnapshot) {
           if (courseSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -40,7 +40,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
           return ListView(
             children: courses.map((course) {
               return StreamBuilder<List<Topic>>(
-                stream: firestoreService.getTopics(course.id),
+                stream: firestoreService.getTopics(course.id, userId), // Provide courseId and userId here
                 builder: (context, topicSnapshot) {
                   if (topicSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

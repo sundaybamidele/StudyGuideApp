@@ -11,17 +11,18 @@ class FirestoreService {
   final CollectionReference topicsCollection = FirebaseFirestore.instance.collection('topics');
   final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results'); // New collection for assessment results
   final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback'); // New collection for feedback
-  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users'); // Collection for user profiles
+  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('user_profiles'); // Collection for user profiles
   final FirebaseFunctions functions = FirebaseFunctions.instance; // Initialize Firebase Functions
 
   FirestoreService();
 
   // Create a new course
-  Future<void> createCourse(String title, String description) async {
+  Future<void> createCourse(String title, String description, String userId) async {
     try {
       await coursesCollection.add({
         'title': title,
         'description': description,
+        'userId': userId, // Associate with the user who created it
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -76,6 +77,7 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
+    required String userId, // Associate with the user who created it
   }) async {
     try {
       await topicsCollection.add({
@@ -84,6 +86,7 @@ class FirestoreService {
         'content': content,
         'duration': duration,
         'completed': false, // Initialize as not completed
+        'userId': userId, // Associate with the user who created it
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -104,12 +107,14 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
+    required String userId, // Add userId parameter
   }) async {
     try {
       await topicsCollection.doc(topicId).update({
         'title': title,
         'content': content,
         'duration': duration,
+        'userId': userId, // Update userId if needed
         'updated_at': FieldValue.serverTimestamp(),
       });
       if (kDebugMode) {
@@ -171,11 +176,14 @@ class FirestoreService {
     }
   }
 
-  // Get all courses
-  Stream<List<Course>> getCourses() {
-    return coursesCollection.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Course.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
-    );
+  // Get all courses for a specific user
+  Stream<List<Course>> getCourses(String userId) {
+    return coursesCollection
+      .where('userId', isEqualTo: userId) // Filter by userId
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Course.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
+          .toList());
   }
 
   // Get a single course by its ID
@@ -195,11 +203,15 @@ class FirestoreService {
     }
   }
 
-  // Get topics for a specific course
-  Stream<List<Topic>> getTopics(String courseId) {
-    return topicsCollection.where('course_id', isEqualTo: courseId).snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id)).toList()
-    );
+  // Get topics for a specific course and user
+  Stream<List<Topic>> getTopics(String courseId, String userId) {
+    return topicsCollection
+      .where('course_id', isEqualTo: courseId)
+      .where('userId', isEqualTo: userId) // Filter by userId
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
+          .toList());
   }
 
   // Get a single topic by its ID
@@ -296,7 +308,25 @@ class FirestoreService {
     }
   }
 
-  // Create or update a user profile
+  // Create a user document
+  Future<void> createUserDocument(String uid, String email) async {
+    try {
+      await usersCollection.doc(uid).set({
+        'email': email,
+        'created_at': FieldValue.serverTimestamp(),
+      });
+      if (kDebugMode) {
+        print('User document created successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error creating user document: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Update or create a user profile
   Future<void> updateUserProfile(UserProfile userProfile) async {
     try {
       await usersCollection.doc(userProfile.uid).set(userProfile.toMap(), SetOptions(merge: true));

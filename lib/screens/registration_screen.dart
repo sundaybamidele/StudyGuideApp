@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart'; 
+import '../services/firestore_service.dart'; // Import Firestore service
+import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -19,7 +20,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false); // Get Firestore service
 
     return Scaffold(
       appBar: AppBar(
@@ -65,24 +67,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       setState(() {
                         _isLoading = true;
                       });
-                      final user = await authService.register(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
-                      setState(() {
-                        _isLoading = false;
-                      });
-                      if (user != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Registration successful')),
+                      try {
+                        final user = await authService.register(
+                          _emailController.text,
+                          _passwordController.text,
                         );
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
-                        );
-                      } else {
+                        if (user != null) {
+                          // Create user document in Firestore
+                          await firestoreService.createUserDocument(user.uid, _emailController.text);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Registration successful')),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          );
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                            _errorMessage = 'Failed to register. Please try again.';
+                          });
+                        }
+                      } catch (e) {
                         setState(() {
-                          _errorMessage = 'Failed to register. Please try again.';
+                          _isLoading = false;
+                          _errorMessage = 'Error: $e';
                         });
                       }
                     },

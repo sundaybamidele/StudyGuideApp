@@ -4,20 +4,27 @@ import 'package:studyguideapp/models/course.dart';
 import 'package:studyguideapp/screens/create_course_screen.dart';
 import 'package:studyguideapp/screens/topic_list_screen.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
+import 'package:studyguideapp/services/auth_service.dart'; // Import AuthService to get the current user
 
 class CourseListScreen extends StatelessWidget {
   const CourseListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = Provider.of<FirestoreService>(context);
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid; // Get the userId
+
+    if (userId == null) {
+      return const Center(child: Text('No user logged in'));
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Courses'),
       ),
       body: StreamBuilder<List<Course>>(
-        stream: firestoreService.getCourses(),
+        stream: firestoreService.getCourses(userId), // Pass the userId to getCourses
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

@@ -13,13 +13,14 @@ class TopicListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
+    const userId = 'USER_ID'; // Replace with actual user ID retrieval logic
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Topics'),
       ),
       body: StreamBuilder<List<Topic>>(
-        stream: firestoreService.getTopics(courseId),
+        stream: firestoreService.getTopics(courseId, userId), // Provide courseId and userId here
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

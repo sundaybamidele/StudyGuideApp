@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:studyguideapp/models/course.dart';
 import 'package:studyguideapp/services/firestore_service.dart';
+import 'package:studyguideapp/services/auth_service.dart'; // Import AuthService to get the current user
 
 class CreateCourseScreen extends StatefulWidget {
   final Course? course;
@@ -27,7 +28,9 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = Provider.of<FirestoreService>(context);
+    final firestoreService = Provider.of<FirestoreService>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid; // Get the userId
 
     return Scaffold(
       appBar: AppBar(
@@ -52,10 +55,10 @@ class _CreateCourseScreenState extends State<CreateCourseScreen> {
                 final title = _titleController.text;
                 final description = _descriptionController.text;
 
-                if (title.isNotEmpty && description.isNotEmpty) {
+                if (title.isNotEmpty && description.isNotEmpty && userId != null) {
                   try {
                     if (widget.course == null) {
-                      await firestoreService.createCourse(title, description);
+                      await firestoreService.createCourse(title, description, userId); // Pass userId
                     } else {
                       await firestoreService.updateCourse(
                         widget.course!.id,
