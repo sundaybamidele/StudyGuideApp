@@ -44,9 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _loadUserData() {
     final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.currentUser;
+
     setState(() {
       _userName = user?.displayName ?? 'User';
-      _userPhotoUrl = user?.photoURL ?? 'https://via.placeholder.com/150'; // Placeholder image URL if no profile picture
+      _userPhotoUrl = user?.photoURL ??
+          'https://via.placeholder.com/150'; // Placeholder image URL
     });
   }
 

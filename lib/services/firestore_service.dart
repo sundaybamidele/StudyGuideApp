@@ -176,6 +176,21 @@ class FirestoreService {
     }
   }
 
+  // Save or update user profile
+  Future<void> saveUserProfile(UserProfile userProfile) async {
+    try {
+      await usersCollection.doc(userProfile.uid).set(userProfile.toMap(), SetOptions(merge: true));
+      if (kDebugMode) {
+        print('User profile saved successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving user profile: $e');
+      }
+      rethrow;
+    }
+  }
+
   // Get all courses for a specific user
   Stream<List<Course>> getCourses(String userId) {
     return coursesCollection
@@ -207,11 +222,22 @@ class FirestoreService {
   Stream<List<Topic>> getTopics(String courseId, String userId) {
     return topicsCollection
       .where('course_id', isEqualTo: courseId)
-      .where('userId', isEqualTo: userId)
+      .where('userId', isEqualTo: userId) // Filter by userId to ensure correct data is fetched
       .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
-          .toList());
+      .map((snapshot) {
+        if (kDebugMode) {
+          print('Topics query snapshot: ${snapshot.docs.length}');
+        }
+        return snapshot.docs
+          .map((doc) {
+            final topic = Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id);
+            if (kDebugMode) {
+              print('Topic fetched: ${topic.title}, Course ID: ${topic.courseId}, User ID: ${topic.userId}');
+            }
+            return topic;
+          })
+          .toList();
+      });
   }
 
   // Get a single topic by its ID
@@ -261,24 +287,7 @@ class FirestoreService {
         throw ArgumentError('Ratings must be between 1 and 5');
       }
 
-      // Save feedback to Firestore
       await feedbackCollection.add({
-        'email': email,
-        'usefulness_rating': usefulnessRating,
-        'usage_frequency': usageFrequency,
-        'grades_improvement': gradesImprovement,
-        'navigation_ease_rating': navigationEaseRating,
-        'satisfaction_rating': satisfactionRating,
-        'organization_effect': organizationEffect,
-        'content_quality_rating': contentQualityRating,
-        'recommendation': recommendation,
-        'suggestions': suggestions,
-        'additional_comments': additionalComments,
-        'submitted_at': FieldValue.serverTimestamp(),
-      });
-
-      // Send feedback email via Cloud Functions
-      await functions.httpsCallable('sendFeedbackEmail').call({
         'email': email,
         'usefulnessRating': usefulnessRating,
         'usageFrequency': usageFrequency,
@@ -290,46 +299,31 @@ class FirestoreService {
         'recommendation': recommendation,
         'suggestions': suggestions,
         'additionalComments': additionalComments,
+        'submitted_at': FieldValue.serverTimestamp(),
       });
 
+      // Send feedback response email
+      await functions.httpsCallable('sendFeedbackResponse').call({
+        'email': email,
+        'feedback': {
+          'usefulnessRating': usefulnessRating,
+          'usageFrequency': usageFrequency,
+          'gradesImprovement': gradesImprovement,
+          'navigationEaseRating': navigationEaseRating,
+          'satisfactionRating': satisfactionRating,
+          'organizationEffect': organizationEffect,
+          'contentQualityRating': contentQualityRating,
+          'recommendation': recommendation,
+          'suggestions': suggestions,
+          'additionalComments': additionalComments,
+        }
+      });
       if (kDebugMode) {
-        print('Feedback submitted successfully and email sent.');
+        print('Feedback submitted and email response sent successfully');
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error submitting feedback: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Get user profile by userId
-  Future<UserProfile?> getUserProfile(String userId) async {
-    try {
-      final docSnapshot = await usersCollection.doc(userId).get();
-      if (docSnapshot.exists) {
-        return UserProfile.fromMap(docSnapshot.data() as Map<String, dynamic>);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching user profile: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Save or update user profile
-  Future<void> saveUserProfile(UserProfile userProfile) async {
-    try {
-      await usersCollection.doc(userProfile.uid).set(userProfile.toMap());
-      if (kDebugMode) {
-        print('User profile saved successfully');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error saving user profile: $e');
       }
       rethrow;
     }

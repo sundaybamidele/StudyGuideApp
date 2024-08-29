@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/course.dart';
 import '../models/topic.dart';
 import '../services/firestore_service.dart';
@@ -15,14 +17,23 @@ class _ReminderScreenState extends State<ReminderScreen> {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    const userId = 'USER_ID'; // Replace with actual user ID retrieval logic
+
+    // Dynamically retrieve the user ID
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    
+    // Debug print statement to verify user ID
+    if (userId.isEmpty) {
+      if (kDebugMode) {
+        print('No user ID found. Please check authentication.');
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reminders'),
       ),
       body: StreamBuilder<List<Course>>(
-        stream: firestoreService.getCourses(userId), // Provide userId here
+        stream: firestoreService.getCourses(userId),
         builder: (context, courseSnapshot) {
           if (courseSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -40,7 +51,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
           return ListView(
             children: courses.map((course) {
               return StreamBuilder<List<Topic>>(
-                stream: firestoreService.getTopics(course.id, userId), // Provide courseId and userId here
+                stream: firestoreService.getTopics(course.id, userId),
                 builder: (context, topicSnapshot) {
                   if (topicSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -51,9 +62,13 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   }
 
                   if (!topicSnapshot.hasData || topicSnapshot.data!.isEmpty) {
-                    return ListTile(
+                    return ExpansionTile(
                       title: Text(course.title),
-                      subtitle: const Text('No topics available'),
+                      children: const [
+                        ListTile(
+                          title: Text('No topics available'),
+                        ),
+                      ],
                     );
                   }
 

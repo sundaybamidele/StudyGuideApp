@@ -1,10 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Topic {
   final String id;
   final String courseId;
   final String title;
   final String content;
   final int duration;
-  final bool completed; // New completed field
+  final bool completed;
+  final String userId;
+  final Timestamp createdAt;
+  final Timestamp updatedAt;
 
   Topic({
     required this.id,
@@ -12,17 +17,23 @@ class Topic {
     required this.title,
     required this.content,
     required this.duration,
-    required this.completed, // Initialize completed
+    required this.completed,
+    required this.userId,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  factory Topic.fromFirestore(Map<String, dynamic> data, String id) {
+  factory Topic.fromFirestore(Map<String, dynamic> firestore, String id) {
     return Topic(
       id: id,
-      courseId: data['course_id'] ?? '',
-      title: data['title'] ?? '',
-      content: data['content'] ?? '',
-      duration: data['duration'] ?? 0,
-      completed: data['completed'] ?? false, // Parse completed
+      courseId: firestore['course_id'] as String,
+      title: firestore['title'] as String,
+      content: firestore['content'] as String,
+      duration: firestore['duration'] as int,
+      completed: firestore['completed'] as bool,
+      userId: firestore['userId'] as String,
+      createdAt: firestore['created_at'] as Timestamp,
+      updatedAt: firestore['updated_at'] as Timestamp,
     );
   }
 
@@ -32,7 +43,10 @@ class Topic {
       'title': title,
       'content': content,
       'duration': duration,
-      'completed': completed, // Include completed field in map
+      'completed': completed,
+      'userId': userId,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
 }
