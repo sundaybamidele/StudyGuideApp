@@ -3,16 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../models/course.dart';
 import '../models/topic.dart';
-import '../models/assessment_result.dart'; // Import the assessment result model
-import '../models/user.dart'; // Import the user profile model
+import '../models/assessment_result.dart';
+import '../models/user_profile.dart';
 
 class FirestoreService {
   final CollectionReference coursesCollection = FirebaseFirestore.instance.collection('courses');
   final CollectionReference topicsCollection = FirebaseFirestore.instance.collection('topics');
-  final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results'); // New collection for assessment results
-  final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback'); // New collection for feedback
-  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('user_profiles'); // Collection for user profiles
-  final FirebaseFunctions functions = FirebaseFunctions.instance; // Initialize Firebase Functions
+  final CollectionReference assessmentResultsCollection = FirebaseFirestore.instance.collection('assessment_results');
+  final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('feedback');
+  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('user_profiles');
+  final FirebaseFunctions functions = FirebaseFunctions.instance;
 
   FirestoreService();
 
@@ -22,7 +22,7 @@ class FirestoreService {
       await coursesCollection.add({
         'title': title,
         'description': description,
-        'userId': userId, // Associate with the user who created it
+        'userId': userId,
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -77,7 +77,7 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
-    required String userId, // Associate with the user who created it
+    required String userId,
   }) async {
     try {
       await topicsCollection.add({
@@ -85,8 +85,8 @@ class FirestoreService {
         'title': title,
         'content': content,
         'duration': duration,
-        'completed': false, // Initialize as not completed
-        'userId': userId, // Associate with the user who created it
+        'completed': false,
+        'userId': userId,
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
       });
@@ -107,14 +107,14 @@ class FirestoreService {
     required String title,
     required String content,
     required int duration,
-    required String userId, // Add userId parameter
+    required String userId,
   }) async {
     try {
       await topicsCollection.doc(topicId).update({
         'title': title,
         'content': content,
         'duration': duration,
-        'userId': userId, // Update userId if needed
+        'userId': userId,
         'updated_at': FieldValue.serverTimestamp(),
       });
       if (kDebugMode) {
@@ -179,7 +179,7 @@ class FirestoreService {
   // Get all courses for a specific user
   Stream<List<Course>> getCourses(String userId) {
     return coursesCollection
-      .where('userId', isEqualTo: userId) // Filter by userId
+      .where('userId', isEqualTo: userId)
       .snapshots()
       .map((snapshot) => snapshot.docs
           .map((doc) => Course.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
@@ -207,7 +207,7 @@ class FirestoreService {
   Stream<List<Topic>> getTopics(String courseId, String userId) {
     return topicsCollection
       .where('course_id', isEqualTo: courseId)
-      .where('userId', isEqualTo: userId) // Filter by userId
+      .where('userId', isEqualTo: userId)
       .snapshots()
       .map((snapshot) => snapshot.docs
           .map((doc) => Topic.fromFirestore(doc.data() as Map<String, dynamic>, doc.id))
@@ -253,7 +253,7 @@ class FirestoreService {
     String additionalComments
   ) async {
     try {
-      // Check if ratings are within expected range (e.g., 1 to 5)
+      // Validate ratings
       if (usefulnessRating < 1 || usefulnessRating > 5 ||
           navigationEaseRating < 1 || navigationEaseRating > 5 ||
           satisfactionRating < 1 || satisfactionRating > 5 ||
@@ -261,6 +261,7 @@ class FirestoreService {
         throw ArgumentError('Ratings must be between 1 and 5');
       }
 
+      // Save feedback to Firestore
       await feedbackCollection.add({
         'email': email,
         'usefulness_rating': usefulnessRating,
@@ -276,29 +277,23 @@ class FirestoreService {
         'submitted_at': FieldValue.serverTimestamp(),
       });
 
-      // Sending feedback via Cloud Functions
-      try {
-        await functions.httpsCallable('sendFeedbackEmail').call({
-          'email': email,
-          'usefulnessRating': usefulnessRating,
-          'usageFrequency': usageFrequency,
-          'gradesImprovement': gradesImprovement,
-          'navigationEaseRating': navigationEaseRating,
-          'satisfactionRating': satisfactionRating,
-          'organizationEffect': organizationEffect,
-          'contentQualityRating': contentQualityRating,
-          'recommendation': recommendation,
-          'suggestions': suggestions,
-          'additionalComments': additionalComments,
-        });
-        if (kDebugMode) {
-          print('Feedback email sent successfully');
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error sending feedback email: $e');
-        }
-        rethrow;
+      // Send feedback email via Cloud Functions
+      await functions.httpsCallable('sendFeedbackEmail').call({
+        'email': email,
+        'usefulnessRating': usefulnessRating,
+        'usageFrequency': usageFrequency,
+        'gradesImprovement': gradesImprovement,
+        'navigationEaseRating': navigationEaseRating,
+        'satisfactionRating': satisfactionRating,
+        'organizationEffect': organizationEffect,
+        'contentQualityRating': contentQualityRating,
+        'recommendation': recommendation,
+        'suggestions': suggestions,
+        'additionalComments': additionalComments,
+      });
+
+      if (kDebugMode) {
+        print('Feedback submitted successfully and email sent.');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -308,43 +303,10 @@ class FirestoreService {
     }
   }
 
-  // Create a user document
-  Future<void> createUserDocument(String uid, String email) async {
+  // Get user profile by userId
+  Future<UserProfile?> getUserProfile(String userId) async {
     try {
-      await usersCollection.doc(uid).set({
-        'email': email,
-        'created_at': FieldValue.serverTimestamp(),
-      });
-      if (kDebugMode) {
-        print('User document created successfully');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error creating user document: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Update or create a user profile
-  Future<void> updateUserProfile(UserProfile userProfile) async {
-    try {
-      await usersCollection.doc(userProfile.uid).set(userProfile.toMap(), SetOptions(merge: true));
-      if (kDebugMode) {
-        print('User profile updated successfully');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error updating user profile: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Fetch a user profile by ID
-  Future<UserProfile?> getUserProfile(String uid) async {
-    try {
-      final docSnapshot = await usersCollection.doc(uid).get();
+      final docSnapshot = await usersCollection.doc(userId).get();
       if (docSnapshot.exists) {
         return UserProfile.fromMap(docSnapshot.data() as Map<String, dynamic>);
       } else {
@@ -353,6 +315,21 @@ class FirestoreService {
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching user profile: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Save or update user profile
+  Future<void> saveUserProfile(UserProfile userProfile) async {
+    try {
+      await usersCollection.doc(userProfile.uid).set(userProfile.toMap());
+      if (kDebugMode) {
+        print('User profile saved successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving user profile: $e');
       }
       rethrow;
     }

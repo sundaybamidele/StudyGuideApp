@@ -1,8 +1,10 @@
-class UserProfile {
+import 'package:flutter/foundation.dart';
+
+class UserProfile extends ChangeNotifier { // Extend ChangeNotifier
   final String uid;
   final String name;
   final String email;
-  final String? profilePictureUrl;
+  late final String? profilePictureUrl;
 
   UserProfile({
     required this.uid,
@@ -10,6 +12,12 @@ class UserProfile {
     required this.email,
     this.profilePictureUrl,
   });
+
+  // Add methods to update user profile data and notify listeners
+  void updateProfilePicture(String? newUrl) {
+    profilePictureUrl = newUrl;
+    notifyListeners(); // Notify listeners when the profile is updated
+  }
 
   Map<String, dynamic> toMap() {
     return {

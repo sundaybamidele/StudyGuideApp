@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'services/auth_service.dart';
-import 'services/firestore_service.dart'; // Import FirestoreService
-import 'services/storage_service.dart'; // Import StorageService
+import 'services/firestore_service.dart';
+import 'services/storage_service.dart';
+import 'models/user_profile.dart'; // Import UserProfile model
 import 'screens/user_profile_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/home_screen.dart'; // Import HomeScreen
-import 'screens/splash_screen.dart'; // Import SplashScreen
-import 'screens/course_list_screen.dart'; // Import CourseListScreen
-import 'screens/study_materials_screen.dart'; // Import StudyMaterialsScreen
+import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/course_list_screen.dart';
+import 'screens/study_materials_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +19,13 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        Provider(create: (_) => FirestoreService()), // Add FirestoreService provider
-        Provider(create: (_) => StorageService()), // Add StorageService provider
+        Provider(create: (_) => FirestoreService()),
+        Provider(create: (_) => StorageService()),
+        ChangeNotifierProvider(create: (_) => UserProfile(
+          uid: 'example_uid', 
+          name: 'example_name',
+          email: 'example_email',
+        )), // UserProfile now extends ChangeNotifier
       ],
       child: const MyApp(),
     ),
@@ -36,14 +42,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const SplashScreen(), // Set SplashScreen as the initial screen
+      home: const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/profile': (context) => const UserProfileScreen(),
-        '/manage_courses': (context) => const CourseListScreen(), // Updated route
-        '/study_materials': (context) => const StudyMaterialsScreen(), // Add StudyMaterialsScreen route
-        // Add other routes if needed
+        '/manage_courses': (context) => const CourseListScreen(),
+        '/study_materials': (context) => const StudyMaterialsScreen(),
       },
     );
   }

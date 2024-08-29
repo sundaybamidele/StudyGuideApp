@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/topic.dart';
+import '../models/user_profile.dart'; // Corrected import for UserProfile
 import '../services/firestore_service.dart';
 import 'create_topic_screen.dart';
 
@@ -13,7 +15,23 @@ class TopicListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    const userId = 'USER_ID'; // Replace with actual user ID retrieval logic
+    
+    // Retrieve userProfile from the provider
+    UserProfile? userProfile;
+    try {
+      userProfile = Provider.of<UserProfile>(context, listen: false);
+    } catch (e) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Topics'),
+        ),
+        body: Center(
+          child: Text('UserProfile provider not found: ${e.toString()}'),
+        ),
+      );
+    }
+    
+    final userId = userProfile.uid;
 
     return Scaffold(
       appBar: AppBar(
@@ -25,14 +43,21 @@ class TopicListScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching topics'));
+            return Center(child: Text('Error fetching topics: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No topics found'));
           }
 
           final topics = snapshot.data!;
-          // ignore: avoid_print
-          print('Fetched ${topics.length} topics'); // Debugging print statement
+          // Debugging print statements
+          if (kDebugMode) {
+            print('Fetched ${topics.length} topics');
+          }
+          for (var topic in topics) {
+            if (kDebugMode) {
+              print('Topic: ${topic.title}, Completed: ${topic.completed}');
+            }
+          }
 
           return ListView.builder(
             itemCount: topics.length,
