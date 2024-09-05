@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth for user authentication
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/storage_service.dart';
@@ -21,11 +22,22 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthService()),
         Provider(create: (_) => FirestoreService()),
         Provider(create: (_) => StorageService()),
-        ChangeNotifierProvider(create: (_) => UserProfile(
-          uid: 'example_uid', 
-          name: 'example_name',
-          email: 'example_email',
-        )), // UserProfile now extends ChangeNotifier
+        // UserProfile provider, populated with the current FirebaseAuth user
+        ChangeNotifierProvider<UserProfile>(
+          create: (_) {
+            final firebaseUser = FirebaseAuth.instance.currentUser;
+            return UserProfile(
+              uid: firebaseUser?.uid ?? '', 
+              name: firebaseUser?.displayName ?? 'Guest',
+              email: firebaseUser?.email ?? '',
+            );
+          },
+        ),
+        // Listen to authentication state changes
+        StreamProvider<User?>.value(
+          value: FirebaseAuth.instance.authStateChanges(),
+          initialData: FirebaseAuth.instance.currentUser,
+        ),
       ],
       child: const MyApp(),
     ),
@@ -37,12 +49,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final firebaseUser = Provider.of<User?>(context);
+
     return MaterialApp(
       title: 'Study Guide App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const SplashScreen(),
+      home: firebaseUser == null ? const LoginScreen() : const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),

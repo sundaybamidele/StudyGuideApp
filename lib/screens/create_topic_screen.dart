@@ -21,7 +21,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    final user = Provider.of<UserProfile>(context);
+    final user = Provider.of<UserProfile>(context); // Retrieve the user profile
 
     return Scaffold(
       appBar: AppBar(
@@ -53,20 +53,24 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() == true) {
+                    // Extract values from the text fields
                     final title = _titleController.text;
                     final content = _contentController.text;
                     final duration = int.parse(_durationController.text);
-                    final userId = user.uid;
+                    final userId = user.uid; // Retrieve the userId
 
+                    // Create the topic in Firestore
                     firestoreService.createTopic(
                       courseId: widget.courseId,
                       title: title,
                       content: content,
                       duration: duration,
-                      userId: userId,
+                      userId: userId, // Pass the userId here
                     ).then((_) {
+                      // Successfully created, pop the screen
                       Navigator.pop(context);
                     }).catchError((e) {
+                      // Show an error message if something goes wrong
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Error creating topic: $e')),
                       );
@@ -80,5 +84,13 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _durationController.dispose();
+    super.dispose();
   }
 }

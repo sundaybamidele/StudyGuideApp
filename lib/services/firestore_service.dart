@@ -222,7 +222,7 @@ class FirestoreService {
   Stream<List<Topic>> getTopics(String courseId, String userId) {
     return topicsCollection
       .where('course_id', isEqualTo: courseId)
-      .where('userId', isEqualTo: userId) // Filter by userId to ensure correct data is fetched
+      .where('userId', isEqualTo: userId) // Filter by userId
       .snapshots()
       .map((snapshot) {
         if (kDebugMode) {
@@ -305,21 +305,11 @@ class FirestoreService {
       // Send feedback response email
       await functions.httpsCallable('sendFeedbackResponse').call({
         'email': email,
-        'feedback': {
-          'usefulnessRating': usefulnessRating,
-          'usageFrequency': usageFrequency,
-          'gradesImprovement': gradesImprovement,
-          'navigationEaseRating': navigationEaseRating,
-          'satisfactionRating': satisfactionRating,
-          'organizationEffect': organizationEffect,
-          'contentQualityRating': contentQualityRating,
-          'recommendation': recommendation,
-          'suggestions': suggestions,
-          'additionalComments': additionalComments,
-        }
+        'message': 'Thank you for your feedback!',
       });
+
       if (kDebugMode) {
-        print('Feedback submitted and email response sent successfully');
+        print('Feedback submitted and response email sent successfully');
       }
     } catch (e) {
       if (kDebugMode) {
