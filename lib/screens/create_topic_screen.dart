@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/firestore_service.dart';
 import '../models/user_profile.dart';
+import '../models/topic.dart'; // Import Topic model
 
 class CreateTopicScreen extends StatefulWidget {
   final String courseId;
+  final Topic? topic; // Added topic parameter for editing
 
-  const CreateTopicScreen({super.key, required this.courseId});
+  const CreateTopicScreen({super.key, required this.courseId, this.topic});
 
   @override
   _CreateTopicScreenState createState() => _CreateTopicScreenState();
@@ -18,6 +20,19 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
   final _contentController = TextEditingController();
   final _durationController = TextEditingController();
 
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.topic != null) {
+      _isEditing = true;
+      _titleController.text = widget.topic!.title;
+      _contentController.text = widget.topic!.content;
+      _durationController.text = widget.topic!.duration.toString();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
@@ -25,7 +40,7 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Topic'),
+        title: Text(_isEditing ? 'Edit Topic' : 'Create Topic'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -59,25 +74,40 @@ class _CreateTopicScreenState extends State<CreateTopicScreen> {
                     final duration = int.parse(_durationController.text);
                     final userId = user.uid; // Retrieve the userId
 
-                    // Create the topic in Firestore
-                    firestoreService.createTopic(
-                      courseId: widget.courseId,
-                      title: title,
-                      content: content,
-                      duration: duration,
-                      userId: userId, // Pass the userId here
-                    ).then((_) {
-                      // Successfully created, pop the screen
-                      Navigator.pop(context);
-                    }).catchError((e) {
-                      // Show an error message if something goes wrong
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error creating topic: $e')),
-                      );
-                    });
+                    if (_isEditing) {
+                      // Update the existing topic
+                      firestoreService.updateTopic(
+                        topicId: widget.topic!.id,
+                        title: title,
+                        content: content,
+                        duration: duration,
+                        userId: userId,
+                      ).then((_) {
+                        Navigator.pop(context);
+                      }).catchError((e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error updating topic: $e')),
+                        );
+                      });
+                    } else {
+                      // Create a new topic
+                      firestoreService.createTopic(
+                        courseId: widget.courseId,
+                        title: title,
+                        content: content,
+                        duration: duration,
+                        userId: userId,
+                      ).then((_) {
+                        Navigator.pop(context);
+                      }).catchError((e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error creating topic: $e')),
+                        );
+                      });
+                    }
                   }
                 },
-                child: const Text('Create Topic'),
+                child: Text(_isEditing ? 'Update Topic' : 'Create Topic'),
               ),
             ],
           ),

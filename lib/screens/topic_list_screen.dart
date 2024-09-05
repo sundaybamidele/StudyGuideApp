@@ -2,15 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/topic.dart';
-import '../models/user_profile.dart'; // Corrected import for UserProfile
+import '../models/user_profile.dart';
 import '../services/firestore_service.dart';
 import 'create_topic_screen.dart';
 
 class TopicListScreen extends StatelessWidget {
   final String courseId;
 
-  // ignore: use_super_parameters
-  const TopicListScreen({Key? key, required this.courseId}) : super(key: key);
+  const TopicListScreen({super.key, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,7 @@ class TopicListScreen extends StatelessWidget {
         title: const Text('Topics'),
       ),
       body: StreamBuilder<List<Topic>>(
-        stream: firestoreService.getTopics(courseId, userId), // Provide courseId and userId here
+        stream: firestoreService.getTopics(courseId, userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,7 +48,6 @@ class TopicListScreen extends StatelessWidget {
           }
 
           final topics = snapshot.data!;
-          // Debugging print statements
           if (kDebugMode) {
             print('Fetched ${topics.length} topics');
           }
@@ -66,9 +64,51 @@ class TopicListScreen extends StatelessWidget {
               return ListTile(
                 title: Text(topic.title),
                 subtitle: Text('Duration: ${topic.duration} minutes'),
-                onTap: () {
-                  // Navigate to the topic detail or edit screen
-                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreateTopicScreen(
+                              courseId: courseId,
+                              topic: topic,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final shouldDelete = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Topic'),
+                            content: const Text('Are you sure you want to delete this topic?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldDelete == true) {
+                          await firestoreService.deleteTopic(topic.id);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               );
             },
           );
