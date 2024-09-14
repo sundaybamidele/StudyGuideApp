@@ -14,7 +14,7 @@ class TopicListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firestoreService = Provider.of<FirestoreService>(context);
-    
+    //....
     // Retrieve userProfile from the provider
     UserProfile? userProfile;
     try {
