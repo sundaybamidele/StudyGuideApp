@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  final FirebaseAnalytics analytics;
-
-  const LoginScreen({super.key, required this.analytics});
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -65,13 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         _isLoading = false;
                       });
                       if (user != null) {
-                        await widget.analytics.logEvent(name: 'login', parameters: {'method': 'email'});
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Login successful')),
                         );
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => HomeScreen(analytics: widget.analytics)),
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
                         );
                       } else {
                         setState(() {
