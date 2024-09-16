@@ -12,7 +12,7 @@ class StorageService {
       await _storage.ref('study_materials/${file.name}').putFile(File(file.path!));
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('Upload error: $e');
       }
     }
   }
@@ -27,22 +27,30 @@ class StorageService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('List files error: $e');
       }
     }
     return files;
   }
 
-  Future<void> downloadFile(String fileName) async {
+  Future<String?> downloadFile(String fileName) async {
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
-      File downloadToFile = File('${appDocDir.path}/$fileName');
+      final localFile = File('${appDocDir.path}/$fileName');
 
-      await _storage.ref('study_materials/$fileName').writeToFile(downloadToFile);
+      await _storage.ref('study_materials/$fileName').writeToFile(localFile);
+
+      // Return the local file path
+      if (await localFile.exists()) {
+        return localFile.path;
+      } else {
+        return null;
+      }
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        print('Download error: $e');
       }
+      return null;
     }
   }
 }
