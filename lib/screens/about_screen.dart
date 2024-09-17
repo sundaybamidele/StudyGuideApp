@@ -14,6 +14,14 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Add your image here (replace with your actual image path)
+            Center(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: AssetImage('assets/images/student_photo.jpg'), // Update this path to your image
+              ),
+            ),
+            SizedBox(height: 16),
             Text(
               'Application Information',
               style: TextStyle(
@@ -57,6 +65,34 @@ class AboutScreen extends StatelessWidget {
             ),
             Text(
               'Title: Senior Lecturer',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Department: Department of Computer Science',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Faculty: Faculty of Science and Engineering',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Institution: University of Wolverhampton, United Kingdom',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Reader:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Name: Alix Bergeret',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Title: Reader',
               style: TextStyle(fontSize: 16),
             ),
             Text(

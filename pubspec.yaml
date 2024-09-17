@@ -13,6 +13,7 @@ dependencies:
   firebase_core: ^3.4.0
   firebase_auth: ^5.1.2
   cloud_firestore: ^5.4.0
+  permission_handler: ^11.2.0
   intl: ^0.19.0
   sqflite: ^2.1.0
   path: ^1.8.3
@@ -46,3 +47,4 @@ flutter:
   assets:
     - assets/images/app_icon.png
     - assets/images/profile_picture.png
+    - assets/images/student_photo.jpg
