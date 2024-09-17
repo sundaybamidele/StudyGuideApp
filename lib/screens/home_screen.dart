@@ -47,8 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _userName = user?.displayName ?? 'User';
-      _userPhotoUrl = user?.photoURL ??
-          'https://via.placeholder.com/150'; // Placeholder image URL
+      _userPhotoUrl = user?.photoURL ?? 'https://firebasestorage.googleapis.com/v0/b/studyguideapp-4a8bf.appspot.com/o/profile_images%2FwTrlboZLkMhlY8gf2edfuIAxFjl1.jpg?alt=media&token=b703389d-150f-4cc6-b74e-14357d639eb9'; // Placeholder image URL
     });
   }
 

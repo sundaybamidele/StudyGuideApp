@@ -35,9 +35,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _updateProfileImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery); // Updated method
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      final file = File(pickedFile.path); // Import dart:io to use File
+      final file = File(pickedFile.path);
       final user = Provider.of<AuthService>(context, listen: false).currentUser;
 
       if (user != null) {
