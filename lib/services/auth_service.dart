@@ -114,7 +114,7 @@ class AuthService extends ChangeNotifier {
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        final ref = _storage.ref().child('profile_pictures').child(user.uid);
+        final ref = _storage.ref().child('profile_images').child('${user.uid}.jpg');
         await ref.putFile(file);
         final downloadURL = await ref.getDownloadURL();
         await user.updateProfile(photoURL: downloadURL);

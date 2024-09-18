@@ -38,7 +38,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final user = authService.currentUser;
 
       if (user != null) {
         final ref = FirebaseStorage.instance
@@ -48,11 +49,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         await ref.putFile(file);
         final url = await ref.getDownloadURL();
 
-        await user.updatePhotoURL(url);
-        await Provider.of<AuthService>(context, listen: false).updateUserProfile(
-          user.displayName ?? '',
-          user.email ?? '',
-        );
+        await authService.uploadProfilePicture(file); // Ensure this updates the profile picture
+
         setState(() {
           _profileImageUrl = url;
         });

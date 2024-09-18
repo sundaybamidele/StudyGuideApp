@@ -26,10 +26,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _updateProfile() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final authService = Provider.of<AuthService>(context, listen: false);
+    try {
+      await authService.updateUserProfile(
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to update profile';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
@@ -37,14 +58,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            const SizedBox(height: 16.0),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Name'),
@@ -52,34 +66,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      try {
-                        await authService.updateUserProfile(
-                          _nameController.text,
-                          _emailController.text,
-                        );
-                        Navigator.pop(context);
-                      } catch (e) {
-                        setState(() {
-                          _errorMessage = 'Error updating profile: $e';
-                        });
-                      } finally {
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      }
-                    },
-                    child: const Text('Save Changes'),
-                  ),
+            if (_errorMessage != null) ...[
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _updateProfile,
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Update Profile'),
+            ),
           ],
         ),
       ),
