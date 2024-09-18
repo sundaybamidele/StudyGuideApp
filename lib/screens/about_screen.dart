@@ -92,7 +92,7 @@ class AboutScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
             Text(
-              'Title: Reader',
+              'Title: Senior Lecturer',
               style: TextStyle(fontSize: 16),
             ),
             Text(
